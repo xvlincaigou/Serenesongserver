@@ -1,4 +1,4 @@
-module Getsuyobi/TsiangBiangNgau
+module QingPingYue_server
 
 go 1.23.2
 
