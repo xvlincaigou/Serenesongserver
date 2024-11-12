@@ -21,3 +21,22 @@ type User struct {
 	Drafts               []Ci                 `bson:"drafts"`                // 用户的草稿箱，这个我们选择在用户中嵌入，因为草稿箱是用户私有的
 	PrivateConversations []primitive.ObjectID `bson:"private_conversations"` // 用户的私信会话列表，仍然只存放id
 }
+
+// NewUser 创建一个初始化后的 User 实例，确保切片字段不为 nil
+func NewUser(openID, sessionKey, token string) User {
+	return User{
+		OpenID:               openID,
+		SessionKey:           sessionKey,
+		Token:                token,
+		Avatar:               "",
+		CiRead:               []primitive.ObjectID{},
+		CiWritten:            []primitive.ObjectID{},
+		CiLiked:              []primitive.ObjectID{},
+		Collections:          []primitive.ObjectID{},
+		SubscribedTo:         []primitive.ObjectID{},
+		Subscribers:          []primitive.ObjectID{},
+		Dynamics:             []Dynamic{},
+		Drafts:               []Ci{},
+		PrivateConversations: []primitive.ObjectID{},
+	}
+}
