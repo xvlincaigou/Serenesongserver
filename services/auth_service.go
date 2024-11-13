@@ -63,7 +63,7 @@ func LoginHandler(c *gin.Context, wxcode string) {
 	// 检查响应中的错误码
 	if loginResp.ErrCode != 0 {
 		// 如果有错误码，返回错误响应
-		utils.HandleError(c, loginResp.ErrCode, loginResp.ErrMsg, nil)
+		utils.HandleError(c, http.StatusInternalServerError, loginResp.ErrMsg, nil)
 		return
 	}
 
@@ -106,8 +106,6 @@ func LoginHandler(c *gin.Context, wxcode string) {
 	}
 
 	// 返回成功响应
-	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-	})
+	c.JSON(http.StatusOK, gin.H{"token": token})
 
 }

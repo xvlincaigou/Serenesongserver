@@ -3,7 +3,8 @@ package services
 import (
 	"Serenesongserver/config"
 	"Serenesongserver/models"
-	"fmt"
+	"Serenesongserver/utils"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,12 +16,13 @@ func CreateCollectionHandler(c *gin.Context, collectionName string, token string
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "User not found"})
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
 
 	// 创建新的收藏夹
 	collection := models.Collection{
+		ID:              primitive.NewObjectID(),
 		Name:            collectionName,
 		CollectionItems: []models.CollectionItem{},
 	}
@@ -28,7 +30,7 @@ func CreateCollectionHandler(c *gin.Context, collectionName string, token string
 	// 插入数据库并处理错误
 	insertResult, err := config.MongoClient.Database("serenesong").Collection("collections").InsertOne(c, collection)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to create collection"})
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoInsert, err)
 		return
 	}
 
@@ -39,16 +41,12 @@ func CreateCollectionHandler(c *gin.Context, collectionName string, token string
 		bson.M{"$push": bson.M{"collections": insertResult.InsertedID}},
 	)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to update user collections"})
-		fmt.Print(err)
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
 		return
 	}
 
 	// 返回成功响应
-	c.JSON(200, gin.H{
-		"message":      "Collection created",
-		"collectionID": insertResult.InsertedID,
-	})
+	c.JSON(http.StatusOK, gin.H{"collectionID": insertResult.InsertedID})
 }
 
 func DeleteCollectionHandler(c *gin.Context, collectionID string, token string) {
@@ -56,7 +54,7 @@ func DeleteCollectionHandler(c *gin.Context, collectionID string, token string) 
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "User not found"})
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
 
@@ -64,7 +62,7 @@ func DeleteCollectionHandler(c *gin.Context, collectionID string, token string) 
 	_id, _ := primitive.ObjectIDFromHex(collectionID)
 	_, err = config.MongoClient.Database("serenesong").Collection("collections").DeleteOne(c, bson.M{"_id": _id})
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to delete collection"})
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoDelete, err)
 		return
 	}
 
@@ -75,12 +73,12 @@ func DeleteCollectionHandler(c *gin.Context, collectionID string, token string) 
 		bson.M{"$pull": bson.M{"collections": _id}},
 	)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to update user collections"})
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
 		return
 	}
 
 	// 返回成功响应
-	c.JSON(200, gin.H{"message": "Collection deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "Collection deleted"})
 }
 
 func AddToCollectionHandler(c *gin.Context, collectionID string, ciID string, token string) {
@@ -88,7 +86,7 @@ func AddToCollectionHandler(c *gin.Context, collectionID string, ciID string, to
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "User not found"})
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
 
@@ -100,16 +98,12 @@ func AddToCollectionHandler(c *gin.Context, collectionID string, ciID string, to
 		bson.M{"_id": collection_object_id},
 		bson.M{"$push": bson.M{"collection_items": models.CollectionItem{CiId: ci_object_id, Comment: ""}}},
 	)
-	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to update collection", "error": err.Error()})
-		return
-	}
-	if updateResult.ModifiedCount == 0 {
-		c.JSON(404, gin.H{"message": "Collection not found"})
+	if err != nil || updateResult.ModifiedCount == 0 {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "Collection item added"})
+	c.JSON(http.StatusOK, gin.H{"message": "Collection item added"})
 }
 
 func RemoveFromCollectionHandler(c *gin.Context, collectionID string, ciID string, token string) {
@@ -117,7 +111,7 @@ func RemoveFromCollectionHandler(c *gin.Context, collectionID string, ciID strin
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "User not found"})
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
 
@@ -129,16 +123,12 @@ func RemoveFromCollectionHandler(c *gin.Context, collectionID string, ciID strin
 		bson.M{"_id": collection_object_id},
 		bson.M{"$pull": bson.M{"collection_items": bson.M{"ci_id": ci_object_id}}},
 	)
-	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to update collection", "error": err.Error()})
-		return
-	}
-	if updateResult.ModifiedCount == 0 {
-		c.JSON(404, gin.H{"message": "Collection item not found"})
+	if err != nil || updateResult.ModifiedCount == 0 {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "Collection item removed"})
+	c.JSON(http.StatusOK, gin.H{"message": "Collection item removed"})
 }
 
 func GetAllCollectionsHandler(c *gin.Context, token string) {
@@ -146,7 +136,7 @@ func GetAllCollectionsHandler(c *gin.Context, token string) {
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "User not found"})
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
 
@@ -154,15 +144,15 @@ func GetAllCollectionsHandler(c *gin.Context, token string) {
 	var collections []models.Collection
 	cursor, err := config.MongoClient.Database("serenesong").Collection("collections").Find(c, bson.M{"_id": bson.M{"$in": user.Collections}})
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Failed to get collections"})
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoFind, err)
 		return
 	}
 	if err = cursor.All(c, &collections); err != nil {
-		c.JSON(500, gin.H{"message": "Failed to get collections"})
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoFind, err)
 		return
 	}
 
-	c.JSON(200, gin.H{"collections": collections})
+	c.JSON(http.StatusOK, gin.H{"collections": collections})
 }
 
 func GetAllCollectionItemsHandler(c *gin.Context, collectionID string, token string) {
@@ -170,7 +160,7 @@ func GetAllCollectionItemsHandler(c *gin.Context, collectionID string, token str
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "User not found"})
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
 
@@ -185,7 +175,7 @@ func GetAllCollectionItemsHandler(c *gin.Context, collectionID string, token str
 	}
 
 	if !collectionOwned {
-		c.JSON(403, gin.H{"message": "Collection not owned by user"})
+		utils.HandleError(c, http.StatusForbidden, utils.ErrMsgPermission, nil)
 		return
 	}
 
@@ -193,11 +183,11 @@ func GetAllCollectionItemsHandler(c *gin.Context, collectionID string, token str
 	var collection models.Collection
 	err = config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": _id}).Decode(&collection)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "Collection not found"})
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 		return
 	}
 
-	c.JSON(200, gin.H{"collection_items": collection.CollectionItems})
+	c.JSON(http.StatusOK, gin.H{"collectionItems": collection.CollectionItems})
 }
 
 func ModifyCollectionCommentHandler(c *gin.Context, ciID string, comment string, token string) {
@@ -205,17 +195,12 @@ func ModifyCollectionCommentHandler(c *gin.Context, ciID string, comment string,
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
 	if err != nil {
-		c.JSON(404, gin.H{"message": "User not found"})
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
 
 	// 将 ciID 转换为 ObjectID
-	ciObjectID, err := primitive.ObjectIDFromHex(ciID)
-	if err != nil {
-		c.JSON(400, gin.H{"message": "Invalid collection item ID"})
-		return
-	}
-
+	ciObjectID, _ := primitive.ObjectIDFromHex(ciID)
 	// 批量查询用户的收藏夹，并使用 $elemMatch 提高效率
 	filter := bson.M{
 		"_id": bson.M{"$in": user.Collections},
@@ -229,9 +214,9 @@ func ModifyCollectionCommentHandler(c *gin.Context, ciID string, comment string,
 
 	result := config.MongoClient.Database("serenesong").Collection("collections").FindOneAndUpdate(c, filter, update)
 	if result.Err() != nil {
-		c.JSON(404, gin.H{"message": "Collection or item not found"})
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, result.Err())
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "Collection item comment modified"})
+	c.JSON(http.StatusOK, gin.H{"message": "Collection item comment modified"})
 }

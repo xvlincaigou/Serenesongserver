@@ -2,15 +2,17 @@ package controllers
 
 import (
 	"Serenesongserver/services"
+	"Serenesongserver/utils"
 
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func CreateCollection(c *gin.Context) {
 	collectionName := c.Query("collectionName")
 	token := c.Query("token")
 	if collectionName == "" || token == "" {
-		c.JSON(400, gin.H{"error": "CollectionName and token are required"})
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
 	services.CreateCollectionHandler(c, collectionName, token)
@@ -20,7 +22,7 @@ func DeleteCollection(c *gin.Context) {
 	collectionID := c.Query("collectionID")
 	token := c.Query("token")
 	if collectionID == "" || token == "" {
-		c.JSON(400, gin.H{"error": "CollectionID and token are required"})
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
 	services.DeleteCollectionHandler(c, collectionID, token)
@@ -31,7 +33,7 @@ func AddToCollection(c *gin.Context) {
 	ciID := c.Query("ciID")
 	token := c.Query("token")
 	if collectionID == "" || ciID == "" || token == "" {
-		c.JSON(400, gin.H{"error": "CollectionID, CiID and token are required"})
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
 	services.AddToCollectionHandler(c, collectionID, ciID, token)
@@ -42,7 +44,7 @@ func RemoveFromCollection(c *gin.Context) {
 	ciID := c.Query("ciID")
 	token := c.Query("token")
 	if collectionID == "" || ciID == "" || token == "" {
-		c.JSON(400, gin.H{"error": "CollectionID, CiID and token are required"})
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
 	services.RemoveFromCollectionHandler(c, collectionID, ciID, token)
@@ -51,7 +53,7 @@ func RemoveFromCollection(c *gin.Context) {
 func GetAllColletions(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
-		c.JSON(400, gin.H{"error": "Token is required"})
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
 	services.GetAllCollectionsHandler(c, token)
@@ -61,7 +63,7 @@ func GetAllColletionItems(c *gin.Context) {
 	collectionID := c.Query("collectionID")
 	token := c.Query("token")
 	if collectionID == "" || token == "" {
-		c.JSON(400, gin.H{"error": "CollectionID and token are required"})
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
 	services.GetAllCollectionItemsHandler(c, collectionID, token)
@@ -72,7 +74,7 @@ func ModifyCollectionComment(c *gin.Context) {
 	comment := c.Query("comment")
 	token := c.Query("token")
 	if ciID == "" || comment == "" || token == "" {
-		c.JSON(400, gin.H{"error": "CollectionID, Comment and token are required"})
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
 	services.ModifyCollectionCommentHandler(c, ciID, comment, token)
