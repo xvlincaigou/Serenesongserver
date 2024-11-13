@@ -7,8 +7,14 @@ import (
 )
 
 const (
-	ErrMsgInvalidParams = "wxcode is required"
+	ErrMsgInvalidParams = "invalid parameters"
 	ErrMsgInternalError = "internal server error"
+	ErrMsgUserNotFound  = "user not found"
+	ErrMsgMongoInsert   = "failed to insert into MongoDB"
+	ErrMsgMongoUpdate   = "failed to update MongoDB"
+	ErrMsgMongoDelete   = "failed to delete from MongoDB"
+	ErrMsgMongoFind     = "failed to find in MongoDB"
+	ErrMsgPermission    = "permission denied"
 )
 
 // IsAnyFieldEmpty 检查结构体中的任何字段是否为空
@@ -24,6 +30,9 @@ func IsAnyFieldEmpty(v interface{}) bool {
 
 // handleError 统一处理错误
 func HandleError(c *gin.Context, statusCode int, message string, err error) {
-	c.JSON(statusCode, gin.H{"error": message})
+	if err != nil {
+		message = message + ": " + err.Error()
+	}
+	c.JSON(statusCode, gin.H{"message": message})
 	log.Println(err)
 }
