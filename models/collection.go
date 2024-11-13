@@ -9,6 +9,7 @@ type CollectionItem struct {
 }
 
 type Collection struct {
-	Name            string           `bson:"name"`
-	CollectionItems []CollectionItem `bson:"collection_items"`
+	ID              primitive.ObjectID `bson:"_id" json:"_id"`
+	Name            string             `bson:"name"`
+	CollectionItems []CollectionItem   `bson:"collection_items"`
 }
