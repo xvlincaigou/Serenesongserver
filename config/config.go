@@ -11,9 +11,14 @@ import (
 )
 
 var (
-	AppID       string
-	Secret      string
-	MongoClient *mongo.Client
+	AppID          string
+	Secret         string
+	MongoClient    *mongo.Client
+	Model          string
+	GeneratePicURL string
+	ApiKey         string
+	PicFolder      string
+	CheckPicURL    string
 )
 
 func LoadEnv() {
@@ -24,6 +29,11 @@ func LoadEnv() {
 	AppID = os.Getenv("APPID")
 	Secret = os.Getenv("SECRET")
 	MongoDBURI := os.Getenv("MONGODBURI")
+	Model = os.Getenv("MODEL")
+	GeneratePicURL = os.Getenv("GENERATEPICURL")
+	ApiKey = os.Getenv("APIKEY")
+	PicFolder = os.Getenv("PICFOLDER")
+	CheckPicURL = os.Getenv("CHECKPICURL")
 
 	clientOptions := options.Client().ApplyURI(MongoDBURI)
 	client, err := mongo.Connect(context.Background(), clientOptions)
