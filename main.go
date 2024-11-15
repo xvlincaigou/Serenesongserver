@@ -3,19 +3,16 @@ package main
 import (
 	"Serenesongserver/config"
 	"Serenesongserver/controllers"
-	"Serenesongserver/utils"
+	// "Serenesongserver/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/robfig/cron/v3"
 )
 
 func main() {
 	config.LoadEnv()
 
-	c := cron.New()
-	c.Start()
-	c.AddFunc("@every 24h", utils.GenerateAndDownloadImageWrapper)
-	defer c.Stop()
+	// 只有在需要测试推荐任务的时候才使用这个功能
+	// utils.SetupCronJobs()
 
 	router := gin.Default()
 

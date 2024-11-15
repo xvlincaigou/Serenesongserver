@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -238,4 +239,11 @@ func GenerateAndDownloadImageWrapper() {
 	if err := GenerateAndDownloadImage(); err != nil {
 		log.Println(err)
 	}
+}
+
+func SetupCronJobs() {
+	c := cron.New()
+	c.AddFunc("@every 24h", GenerateAndDownloadImageWrapper)
+	c.Start()
+	go GenerateAndDownloadImageWrapper()
 }
