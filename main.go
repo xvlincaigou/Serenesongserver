@@ -3,12 +3,19 @@ package main
 import (
 	"Serenesongserver/config"
 	"Serenesongserver/controllers"
+	"Serenesongserver/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 )
 
 func main() {
 	config.LoadEnv()
+
+	c := cron.New()
+	c.Start()
+	c.AddFunc("@every 24h", utils.GenerateAndDownloadImageWrapper)
+	defer c.Stop()
 
 	router := gin.Default()
 
@@ -22,5 +29,8 @@ func main() {
 	router.POST("/removeFromCollection", controllers.RemoveFromCollection)
 	router.POST("/modifyCollectionComment", controllers.ModifyCollectionComment)
 
-	router.Run(":8080")
+	router.GET("/recommendCi", controllers.RecommendCi)
+	router.GET("/recommendPic", controllers.RecommendPic)
+
+	router.Run("0.0.0.0:8080")
 }
