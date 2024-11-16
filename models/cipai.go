@@ -12,6 +12,7 @@ type Tune struct {
 
 type CipaiGe struct {
 	Sketch	string `bson:"sketch" json:"sketch"`
+	Desc    string `bson:"desc" json:"desc"`
 	Author	string `bson:"author" json:"author"`
 	Tunes	[]Tune `bson:"tunes" json:"tunes"`
 }
@@ -19,6 +20,7 @@ type CipaiGe struct {
 type Cipai struct {
 	Desc    string 		`bson:"desc" json:"desc"`
 	Formats []CipaiGe 	`bson:"formats" json:"formats"`
+	// Tags 	[]string 	`bson:"tags,omitempty" json:"tags,omitempty"`
 }
 
 type CipaiList map[string]Cipai

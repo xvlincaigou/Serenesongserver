@@ -29,5 +29,8 @@ func main() {
 	router.GET("/recommendCi", controllers.RecommendCi)
 	router.GET("/recommendPic", controllers.RecommendPic)
 
+	// Searching related APIs
+	router.GET("/search", controllers.SearchRouter)
+
 	router.Run("0.0.0.0:8080")
 }
