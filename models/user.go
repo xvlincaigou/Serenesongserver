@@ -9,10 +9,8 @@ type User struct {
 
 	Avatar string `bson:"avatar"` // 头像保存的路径。当然这个可能之后不再需要，这个要看微信接口接的怎么样。
 
-	// 这里的 CiRead, CiWritten, CiLiked 是用户的诗词阅读、创作、点赞记录。对于这些词，我们只保存ID，具体的诗词内容存放在Ci中
-	CiRead    []primitive.ObjectID `bson:"ci_read"`
+	// 这里的 CiWritten 是用户的诗词创作记录。对于这些词，我们只保存ID，具体的诗词内容存放在Ci中
 	CiWritten []primitive.ObjectID `bson:"ci_written"`
-	CiLiked   []primitive.ObjectID `bson:"ci_liked"`
 
 	Collections          []primitive.ObjectID `bson:"collections"`           // 这里我们只存放id列表，具体的收藏的诗词存放在Collections中
 	SubscribedTo         []primitive.ObjectID `bson:"subscribed_to"`         // 用户订阅的用户ID列表
@@ -29,9 +27,7 @@ func NewUser(openID, sessionKey, token string) User {
 		SessionKey:           sessionKey,
 		Token:                token,
 		Avatar:               "",
-		CiRead:               []primitive.ObjectID{},
 		CiWritten:            []primitive.ObjectID{},
-		CiLiked:              []primitive.ObjectID{},
 		Collections:          []primitive.ObjectID{},
 		SubscribedTo:         []primitive.ObjectID{},
 		Subscribers:          []primitive.ObjectID{},
