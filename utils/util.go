@@ -16,6 +16,7 @@ const (
 	ErrMsgMongoFind     = "failed to find in MongoDB"
 	ErrMsgPermission    = "permission denied"
 	ErrMsgMongoDecode   = "failed to parse MongoDB data"
+	ErrMsgInvalidObjID  = "invalid object ID"
 )
 
 // IsAnyFieldEmpty 检查结构体中的任何字段是否为空

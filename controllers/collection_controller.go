@@ -4,8 +4,9 @@ import (
 	"Serenesongserver/services"
 	"Serenesongserver/utils"
 
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func CreateCollection(c *gin.Context) {
@@ -78,4 +79,13 @@ func ModifyCollectionComment(c *gin.Context) {
 		return
 	}
 	services.ModifyCollectionCommentHandler(c, ciID, comment, token)
+}
+
+func GetCollectionItemCount(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
+		return
+	}
+	services.GetCollectionItemCountHandler(c, token)
 }

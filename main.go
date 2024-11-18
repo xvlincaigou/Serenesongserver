@@ -25,12 +25,15 @@ func main() {
 	router.POST("/addToCollection", controllers.AddToCollection)
 	router.POST("/removeFromCollection", controllers.RemoveFromCollection)
 	router.POST("/modifyCollectionComment", controllers.ModifyCollectionComment)
+	router.GET("/getCollectionItemCount", controllers.GetCollectionItemCount)
 
 	router.GET("/recommendCi", controllers.RecommendCi)
 	router.GET("/recommendPic", controllers.RecommendPic)
 
 	// Searching related APIs
 	router.GET("/search", controllers.SearchRouter)
+
+	router.GET("/getCiById", controllers.GetCiById)
 
 	router.Run("0.0.0.0:8080")
 }
