@@ -220,3 +220,56 @@ func ModifyCollectionCommentHandler(c *gin.Context, ciID string, comment string,
 
 	c.JSON(http.StatusOK, gin.H{"message": "Collection item comment modified"})
 }
+
+func GetCollectionItemCountHandler(c *gin.Context, token string) {
+	// 查找用户信息
+	var user models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
+		return
+	}
+
+	// 如果用户没有收藏夹，直接返回0
+	if len(user.Collections) == 0 {
+		c.JSON(http.StatusOK, gin.H{"count": 0})
+		return
+	}
+
+	// 使用简化的聚合查询
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"_id": bson.M{"$in": user.Collections},
+			},
+		},
+		{
+			"$group": bson.M{
+				"_id": nil,
+				"totalCount": bson.M{
+					"$sum": bson.M{"$size": "$collection_items"}, // 修改字段名为 collection_items
+				},
+			},
+		},
+	}
+
+	var result []bson.M
+	cursor, err := config.MongoClient.Database("serenesong").Collection("collections").Aggregate(c, pipeline)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoFind, err)
+		return
+	}
+	defer cursor.Close(c)
+
+	if err = cursor.All(c, &result); err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoFind, err)
+		return
+	}
+
+	count := 0
+	if len(result) > 0 {
+		count = int(result[0]["totalCount"].(int32))
+	}
+
+	c.JSON(http.StatusOK, gin.H{"count": count})
+}
