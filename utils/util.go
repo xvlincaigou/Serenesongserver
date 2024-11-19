@@ -7,16 +7,17 @@ import (
 )
 
 const (
-	ErrMsgInvalidParams = "invalid parameters"
-	ErrMsgInternalError = "internal server error"
-	ErrMsgUserNotFound  = "user not found"
-	ErrMsgMongoInsert   = "failed to insert into MongoDB"
-	ErrMsgMongoUpdate   = "failed to update MongoDB"
-	ErrMsgMongoDelete   = "failed to delete from MongoDB"
-	ErrMsgMongoFind     = "failed to find in MongoDB"
-	ErrMsgPermission    = "permission denied"
-	ErrMsgMongoDecode   = "failed to parse MongoDB data"
-	ErrMsgInvalidObjID  = "invalid object ID"
+	ErrMsgInvalidParams = "Invalid parameters"
+	ErrMsgInternalError = "Internal server error"
+	ErrMsgUserNotFound  = "User not found"
+	ErrMsgMongoInsert   = "Failed to insert into MongoDB"
+	ErrMsgMongoUpdate   = "Failed to update MongoDB"
+	ErrMsgMongoDelete   = "Failed to delete from MongoDB"
+	ErrMsgMongoFind     = "Failed to find in MongoDB"
+	ErrMsgPermission    = "Permission Denied"
+	ErrMsgMongoDecode   = "Failed to parse MongoDB data"
+	ErrMsgMongoConnect  = "Failed to connect to MongoDB"
+	ErrMsgInvalidObjID  = "Invalid object ID"
 )
 
 // IsAnyFieldEmpty 检查结构体中的任何字段是否为空

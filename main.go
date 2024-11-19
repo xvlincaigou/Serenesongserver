@@ -32,6 +32,9 @@ func main() {
 
 	// Searching related APIs
 	router.GET("/search", controllers.SearchRouter)
+	// Composing related APIs
+	router.GET("/getRhymes", controllers.GetRhymes)
+	router.GET("/getFormat", controllers.GetFormat)
 
 	router.GET("/getCiById", controllers.GetCiById)
 
