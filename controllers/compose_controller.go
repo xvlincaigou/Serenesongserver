@@ -6,9 +6,11 @@ import (
 
 	"net/http"
 	"strconv"
+	"encoding/json"
 	// "fmt"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	// "go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -25,4 +27,18 @@ func GetFormat(c *gin.Context) {
 		return
 	}
 	services.ReturnFormat(c, cipai_name, format_num)
+}
+
+func FinishWork(c *gin.Context) {
+	// Get the new work & the token from the query string
+	new_work := c.Query("new_work")
+	token := c.Query("token")
+	// Extract the work data to JSON
+	var work_data bson.M
+	err := json.Unmarshal([]byte(new_work), &work_data)
+	if err!= nil {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
+		return
+	}
+	services.SaveWork(c, work_data, token)
 }

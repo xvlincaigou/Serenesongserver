@@ -18,6 +18,7 @@ const (
 	ErrMsgMongoDecode   = "Failed to parse MongoDB data"
 	ErrMsgMongoConnect  = "Failed to connect to MongoDB"
 	ErrMsgInvalidObjID  = "Invalid object ID"
+	ErrMsgInvalidJSON	= "Invalid JSON format"
 )
 
 // IsAnyFieldEmpty 检查结构体中的任何字段是否为空

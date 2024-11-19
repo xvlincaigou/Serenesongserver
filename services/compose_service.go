@@ -3,9 +3,10 @@ package services
 import (
 	// "strings"
 	// "fmt"
+	"time"
 
 	"Serenesongserver/config"
-	// "Serenesongserver/models"
+	"Serenesongserver/models"
 	"Serenesongserver/utils"
 	"net/http"
 
@@ -13,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	// "golang.org/x/text/message/pipeline"
-	// "go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func ReturnRhymes(c *gin.Context) {
@@ -50,7 +51,10 @@ func ReturnRhymes(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"rhymes": rhymes, "pingze": pingze})
+	c.JSON(http.StatusOK, gin.H{
+		"rhymes": rhymes, 
+		"pingze": pingze,
+	})
 }
 
 func ReturnFormat(c *gin.Context, cipai_name string, format_num int) {
@@ -89,4 +93,38 @@ func ReturnFormat(c *gin.Context, cipai_name string, format_num int) {
 	}
 	// If no formats field found in any matching document, return error
 	c.JSON(http.StatusOK, gin.H{"error": "No formats field found in any matching document"})
+}
+
+func SaveWork(c *gin.Context, work bson.M, token string) {
+	// Verify user token
+	var user models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
+		return
+	}
+	// Save work to database
+	user_work := models.ModernWork {
+		ID:        primitive.NewObjectID(),
+		Author:    work["author"].(primitive.ObjectID),
+		Title:     work["title"].(string),
+		Content:   utils.ToStringArray(work["content"]),
+		Cipai:     utils.ToStringArray(work["cipai"]),
+		Xiaoxu:    work["xiaoxu"].(string),
+		IsPublic:  work["is_public"].(bool),
+		Tags:      utils.ToStringArray(work["tags"]),
+		CreatedAt: work["created_at"].(time.Time),
+		UpdatedAt: time.Now(),
+	}
+	collection := config.MongoClient.Database("serenesong").Collection("UserWorks")
+	_, err = collection.InsertOne(c, user_work)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, "Failed to save work", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Work saved successfully",
+		"work_id": user_work.ID.Hex(),
+	})
 }
