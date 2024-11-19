@@ -11,9 +11,9 @@ import (
 )
 
 func SearchRouter(c *gin.Context) {
-	keyword := c.Query("keyword")
-	option  := c.Query("option")
-	if keyword == "" {
+	keywords := c.QueryArray("keyword")
+	option   := c.Query("option")
+	if len(keywords) == 0 {
 		utils.HandleError(c, http.StatusBadRequest, "Keyword is required", nil)
 		return
 	}
@@ -23,9 +23,9 @@ func SearchRouter(c *gin.Context) {
 	}
 	// fmt.Println("Option:", option)
 	switch {
-		case option == "cipai":  services.CipaiConsult(c, keyword)
-		case option == "ci": 	 services.CiConsult(c, keyword)
-		case option == "author": services.AuthorConsult(c, keyword)
+		case option == "cipai":  services.CipaiConsult(c, keywords)
+		case option == "ci": 	 services.CiConsult(c, keywords)
+		case option == "author": services.AuthorConsult(c, keywords)
 		default:
 			utils.HandleError(c, http.StatusBadRequest, "Invalid option", nil)
 	}
