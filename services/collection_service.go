@@ -190,7 +190,7 @@ func GetAllCollectionItemsHandler(c *gin.Context, collectionID string, token str
 	c.JSON(http.StatusOK, gin.H{"collectionItems": collection.CollectionItems})
 }
 
-func ModifyCollectionCommentHandler(c *gin.Context, ciID string, comment string, token string) {
+func ModifyCollectionCommentHandler(c *gin.Context, ciID string, collectionID string, comment string, token string) {
 	// 查找用户信息
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
@@ -200,10 +200,11 @@ func ModifyCollectionCommentHandler(c *gin.Context, ciID string, comment string,
 	}
 
 	// 将 ciID 转换为 ObjectID
+	collectionObjectID, _ := primitive.ObjectIDFromHex(collectionID)
 	ciObjectID, _ := primitive.ObjectIDFromHex(ciID)
-	// 批量查询用户的收藏夹，并使用 $elemMatch 提高效率
+	// 查询用户的收藏夹，并使用 $elemMatch 提高效率
 	filter := bson.M{
-		"_id": bson.M{"$in": user.Collections},
+		"_id": collectionObjectID,
 		"collection_items": bson.M{
 			"$elemMatch": bson.M{"ci_id": ciObjectID},
 		},

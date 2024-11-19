@@ -72,13 +72,14 @@ func GetAllColletionItems(c *gin.Context) {
 
 func ModifyCollectionComment(c *gin.Context) {
 	ciID := c.Query("ciID")
+	collectionID := c.Query("collectionID")
 	comment := c.Query("comment")
 	token := c.Query("token")
-	if ciID == "" || comment == "" || token == "" {
+	if ciID == "" || collectionID == "" || comment == "" || token == "" {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
-	services.ModifyCollectionCommentHandler(c, ciID, comment, token)
+	services.ModifyCollectionCommentHandler(c, ciID, collectionID, comment, token)
 }
 
 func GetCollectionItemCount(c *gin.Context) {
