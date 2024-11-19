@@ -205,7 +205,7 @@ func ModifyCollectionCommentHandler(c *gin.Context, ciID string, comment string,
 	filter := bson.M{
 		"_id": bson.M{"$in": user.Collections},
 		"collection_items": bson.M{
-			"$elemMatch": bson.M{"ciId": ciObjectID},
+			"$elemMatch": bson.M{"ci_id": ciObjectID},
 		},
 	}
 	update := bson.M{
@@ -272,4 +272,55 @@ func GetCollectionItemCountHandler(c *gin.Context, token string) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"count": count})
+}
+
+func GetCollectionItemHandler(c *gin.Context, collectionID string, ciID string, token string) {
+	// 查找用户信息
+	var user models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
+		return
+	}
+
+	// 验证收藏夹是否属于用户
+	_id, _ := primitive.ObjectIDFromHex(collectionID)
+	collectionOwned := false
+	for _, id := range user.Collections {
+		if id == _id {
+			collectionOwned = true
+			break
+		}
+	}
+
+	if !collectionOwned {
+		utils.HandleError(c, http.StatusForbidden, utils.ErrMsgPermission, nil)
+		return
+	}
+
+	// 从收藏夹中查找是否有这个ciID
+	ciObjectID, _ := primitive.ObjectIDFromHex(ciID)
+	var collection models.Collection
+	err = config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": _id, "collection_items.ci_id": ciObjectID}).Decode(&collection)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+		return
+	}
+
+	// 找到了，返回诗词信息
+	var collectionItem models.CollectionItem
+	for _, item := range collection.CollectionItems {
+		if item.CiId == ciObjectID {
+			collectionItem = item
+			break
+		}
+	}
+	var ci models.Ci
+	err = config.MongoClient.Database("serenesong").Collection("Ci").FindOne(c, bson.M{"_id": ciObjectID}).Decode(&ci)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"collectionItem": collectionItem, "ci": ci})
 }

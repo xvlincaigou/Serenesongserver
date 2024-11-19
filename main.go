@@ -26,6 +26,7 @@ func main() {
 	router.POST("/removeFromCollection", controllers.RemoveFromCollection)
 	router.POST("/modifyCollectionComment", controllers.ModifyCollectionComment)
 	router.GET("/getCollectionItemCount", controllers.GetCollectionItemCount)
+	router.GET("/getCollectionItem", controllers.GetCollectionItem)
 
 	router.GET("/recommendCi", controllers.RecommendCi)
 	router.GET("/recommendPic", controllers.RecommendPic)

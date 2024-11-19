@@ -89,3 +89,14 @@ func GetCollectionItemCount(c *gin.Context) {
 	}
 	services.GetCollectionItemCountHandler(c, token)
 }
+
+func GetCollectionItem(c *gin.Context) {
+	collectionID := c.Query("collectionID")
+	ciID := c.Query("ciID")
+	token := c.Query("token")
+	if collectionID == "" || ciID == "" || token == "" {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
+		return
+	}
+	services.GetCollectionItemHandler(c, collectionID, ciID, token)
+}
