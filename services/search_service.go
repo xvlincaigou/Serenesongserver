@@ -63,8 +63,8 @@ func CipaiConsult(c *gin.Context, keywords []string) {
 			// Check if the cipai contains the keyword
 			var contains bool = true
 			for _, keyword := range keywords {
-				if (!contains) { break }
 				contains = strings.Contains(strings.ToLower(cipai), strings.ToLower(keyword))
+				if (!contains) { break }
 			}
 			if contains {
 				match_list[cipai] = content
