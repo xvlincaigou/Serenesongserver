@@ -122,6 +122,13 @@ func SaveWork(c *gin.Context, work bson.M, token string) {
 		utils.HandleError(c, http.StatusInternalServerError, "Failed to save work", err)
 		return
 	}
+	// Update user's recent works
+	user.CiWritten = append(user.CiWritten, user_work.ID)
+	_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(c, bson.M{"token": token}, bson.M{"$set": bson.M{"recent_works": user.CiWritten}})
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Work saved successfully",
