@@ -52,7 +52,7 @@ func ReturnRhymes(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"rhymes": rhymes, 
+		"rhymes": rhymes,
 		"pingze": pingze,
 	})
 }
@@ -104,7 +104,7 @@ func SaveWork(c *gin.Context, work bson.M, token string) {
 		return
 	}
 	// Save work to database
-	user_work := models.ModernWork {
+	user_work := models.ModernWork{
 		ID:        primitive.NewObjectID(),
 		Author:    work["author"].(primitive.ObjectID),
 		Title:     work["title"].(string),
@@ -133,5 +133,31 @@ func SaveWork(c *gin.Context, work bson.M, token string) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Work saved successfully",
 		"work_id": user_work.ID.Hex(),
+	})
+}
+
+func PutIntoDraftsHandler(c *gin.Context, token string, draftObj models.ModernWork) {
+	// 单次操作完成验证和更新
+	result, err := config.MongoClient.Database("serenesong").Collection("users").UpdateOne(
+		c,
+		bson.M{"token": token},
+		bson.M{
+			"$push": bson.M{"drafts": draftObj},
+		},
+	)
+
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
+		return
+	}
+
+	// 检查是否找到并更新了用户
+	if result.MatchedCount == 0 {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, nil)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Draft saved successfully",
 	})
 }

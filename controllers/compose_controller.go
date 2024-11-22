@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"Serenesongserver/models"
 	"Serenesongserver/services"
 	"Serenesongserver/utils"
 
+	"encoding/json"
 	"net/http"
 	"strconv"
-	"encoding/json"
+
 	// "fmt"
 
 	"github.com/gin-gonic/gin"
@@ -36,9 +38,35 @@ func FinishWork(c *gin.Context) {
 	// Extract the work data to JSON
 	var work_data bson.M
 	err := json.Unmarshal([]byte(new_work), &work_data)
-	if err!= nil {
+	if err != nil {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
 		return
 	}
 	services.SaveWork(c, work_data, token)
+}
+
+func PutIntoDrafts(c *gin.Context) {
+	// Get the data from the request body.
+	var jsonData map[string]interface{}
+	if err := c.ShouldBindJSON(&jsonData); err != nil {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
+		return
+	}
+
+	// Extract the token and the draft data from the JSON.
+	token, token_ok := jsonData["token"].(string)
+	draft, draft_ok := jsonData["draft"].(map[string]interface{})
+	if !token_ok || !draft_ok {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
+		return
+	}
+
+	// Create a new draft object from the data.
+	draftObj, err := models.NewModernWork(draft)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgInternalError, err)
+		return
+	}
+
+	services.PutIntoDraftsHandler(c, token, draftObj)
 }

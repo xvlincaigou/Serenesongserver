@@ -37,6 +37,7 @@ func main() {
 	router.GET("/getRhymes", controllers.GetRhymes)
 	router.GET("/getFormat", controllers.GetFormat)
 	router.GET("/doneWork", controllers.FinishWork)
+	router.POST("/putIntoDrafts", controllers.PutIntoDrafts)
 
 	router.GET("/getCiById", controllers.GetCiById)
 

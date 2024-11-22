@@ -16,7 +16,7 @@ type User struct {
 	SubscribedTo         []primitive.ObjectID `bson:"subscribed_to"`         // 用户订阅的用户ID列表
 	Subscribers          []primitive.ObjectID `bson:"subscribers"`           // 订阅本用户的用户ID列表
 	Dynamics             []Dynamic            `bson:"dynamics"`              // 用户动态列表
-	Drafts               []Ci                 `bson:"drafts"`                // 用户的草稿箱，这个我们选择在用户中嵌入，因为草稿箱是用户私有的
+	Drafts               []ModernWork         `bson:"drafts"`                // 用户的草稿箱，这个我们选择在用户中嵌入，因为草稿箱是用户私有的
 	PrivateConversations []primitive.ObjectID `bson:"private_conversations"` // 用户的私信会话列表，仍然只存放id
 }
 
@@ -32,7 +32,7 @@ func NewUser(openID, sessionKey, token string) User {
 		SubscribedTo:         []primitive.ObjectID{},
 		Subscribers:          []primitive.ObjectID{},
 		Dynamics:             []Dynamic{},
-		Drafts:               []Ci{},
+		Drafts:               []ModernWork{},
 		PrivateConversations: []primitive.ObjectID{},
 	}
 }
