@@ -29,8 +29,6 @@ func NewModernWork(modernWorkData map[string]interface{}) (ModernWork, error) {
 	err := mapstructure.Decode(modernWorkData, &modernWork)
 	modernWork.CreatedAt = time.Now().In(TimeLocation)
 	modernWork.UpdatedAt = time.Now().In(TimeLocation)
-	modernWork.Xiaoxu = ""
-	modernWork.Tags = []string{}
 	if err != nil {
 		return modernWork, err
 	}
