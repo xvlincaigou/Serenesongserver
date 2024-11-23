@@ -36,7 +36,7 @@ func main() {
 	// Composing related APIs
 	router.GET("/getRhymes", controllers.GetRhymes)
 	router.GET("/getFormat", controllers.GetFormat)
-	router.GET("/doneWork", controllers.FinishWork)
+	router.POST("/doneWork", controllers.FinishWork)
 
 	router.GET("/getCiById", controllers.GetCiById)
 
