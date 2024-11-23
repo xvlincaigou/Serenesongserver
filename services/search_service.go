@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	// "golang.org/x/exp/rand"
 	// "golang.org/x/text/message/pipeline"
 	// "go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -102,6 +103,8 @@ func CiConsult(c *gin.Context, keywords []string) {
 		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoFind, err)
 		return
 	}
-
+	// Limit the number of results to 500
+	// Randomly select 500 from the results
+	if len(ci) > 500 { ci = ci[:500] }
 	c.JSON(http.StatusOK, gin.H{"matched_ci": ci})
 }

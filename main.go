@@ -36,14 +36,13 @@ func main() {
 	// Composing related APIs
 	router.GET("/getRhymes", controllers.GetRhymes)
 	router.GET("/getFormat", controllers.GetFormat)
-	router.GET("/doneWork", controllers.FinishWork)
+	router.POST("/doneWork", controllers.FinishWork)
 	router.POST("/putIntoDrafts", controllers.PutIntoDrafts)
 	router.DELETE("/delDraft", controllers.DelDraft)
 	router.POST("/turnToFormal", controllers.TurnToFormal)
 	router.POST("/modifyDraft", controllers.ModifyDraft)
 	router.POST("/modifyWork", controllers.ModifyWork)
 	router.GET("/getMyWorks", controllers.GetMyWorks)
-
 	router.GET("/getCiById", controllers.GetCiById)
 
 	router.Run("0.0.0.0:8080")

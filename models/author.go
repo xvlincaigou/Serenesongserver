@@ -5,7 +5,7 @@ import (
 )
 
 type Author struct {
-	ID    	primitive.ObjectID	`bson:"_id,omitempty" json:"_id,omitempty"`
+	ID    	primitive.ObjectID	`bson:"_id" json:"_id"`
 	Name	string 				`bson:"name" json:"name"`
 	Bio 	string 				`bson:"bio" json:"bio"`
 }
