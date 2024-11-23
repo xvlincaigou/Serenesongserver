@@ -5,10 +5,10 @@ import (
 	"Serenesongserver/services"
 	"Serenesongserver/utils"
 
-	"encoding/json"
+	// "encoding/json"
 	"net/http"
 	"strconv"
-  // "encoding/json"
+	// "encoding/json"
 	// "fmt"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +43,7 @@ func FinishWork(c *gin.Context) {
 	}
 	// Extract the token and the draft data from the JSON.
 	token, token_ok := json_data["token"].(string)
-	work,  work_ok  := json_data["new_work"].(map[string]interface{})
+	work, work_ok := json_data["new_work"].(map[string]interface{})
 	if !token_ok || !work_ok {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
 		return
