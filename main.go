@@ -44,6 +44,12 @@ func main() {
 	router.POST("/modifyWork", controllers.ModifyWork)
 	router.GET("/getMyWorks", controllers.GetMyWorks)
 	router.GET("/getCiById", controllers.GetCiById)
+	// User info related APIs
+	router.GET("/getDynamics", controllers.GetDynamics)
+	router.GET("/getCollections", controllers.GetCollections)
+	router.GET("/getSubscribers", controllers.GetSubscribers)
+	router.GET("/getSubscribedTo", controllers.GetSubscribedTo)
+	
 
 	router.Run("0.0.0.0:8080")
 }

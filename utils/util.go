@@ -20,6 +20,7 @@ const (
 	ErrMsgInvalidObjID  = "Invalid object ID"
 	ErrMsgInvalidJSON   = "Invalid JSON format"
 	ErrMsgMongoCursor   = "Failed to get MongoDB cursor"
+	ErrMsgInvalidToken  = "Invalid token, please retry login."
 )
 
 // IsAnyFieldEmpty 检查结构体中的任何字段是否为空
