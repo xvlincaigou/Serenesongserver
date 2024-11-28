@@ -69,7 +69,7 @@ func ReturnCollections(c *gin.Context, user_id string, token string) {
 		return
 	}
 	// Return collections of the target user
-	collections := target_user.Dynamics
+	collections := target_user.Collections
 	c.JSON(http.StatusOK, gin.H{
 		"collections": collections,
 	})
