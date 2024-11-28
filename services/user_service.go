@@ -69,7 +69,16 @@ func ReturnCollections(c *gin.Context, user_id string, token string) {
 		return
 	}
 	// Return collections of the target user
-	collections := target_user.Collections
+	var collections []models.Collection
+	for _, collection_id := range target_user.Collections {
+		var collection models.Collection
+		err = config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": collection_id}).Decode(&collection)
+		if err != nil {
+			utils.HandleError(c, http.StatusNotFound, "Collection not found", err)
+			return
+		}
+		collections = append(collections, collection)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"collections": collections,
 	})
