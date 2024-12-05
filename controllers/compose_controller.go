@@ -20,6 +20,10 @@ func GetRhymes(c *gin.Context) {
 	services.ReturnRhymes(c)
 }
 
+func GetYunshu(c *gin.Context) {
+	services.ReturnYunshu(c)
+}
+
 func GetFormat(c *gin.Context) {
 	// Turn the format string into an integer
 	cipai_name := c.Query("cipai_name")
