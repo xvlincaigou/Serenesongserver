@@ -59,6 +59,29 @@ func ReturnRhymes(c *gin.Context) {
 	})
 }
 
+func ReturnYunshu(c *gin.Context) {
+	db := config.MongoClient.Database("serenesong")
+	if db == nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoConnect, nil)
+		return
+	}
+	// Fetch collections
+	rhymes_collection := db.Collection("PingshuiYun")
+	rhymes_cursor, err := rhymes_collection.Find(c, bson.M{})
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoFind, err)
+		return
+	}
+	// Decode rhymes
+	var rhymes []bson.M
+	if err := rhymes_cursor.All(c, &rhymes); err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoDecode, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"rhymes": rhymes})
+}
+
 func ReturnFormat(c *gin.Context, cipai_name string, format_num int) {
 	// Get MongoDB "CipaiList" collection
 	collection := config.MongoClient.Database("serenesong").Collection("CipaiList")

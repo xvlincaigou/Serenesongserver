@@ -35,6 +35,7 @@ func main() {
 	router.GET("/search", controllers.SearchRouter)
 	// Composing related APIs
 	router.GET("/getRhymes", controllers.GetRhymes)
+	router.GET("/getYunshu", controllers.GetYunshu)
 	router.GET("/getFormat", controllers.GetFormat)
 	router.POST("/doneWork", controllers.FinishWork)
 	router.POST("/putIntoDrafts", controllers.PutIntoDrafts)
