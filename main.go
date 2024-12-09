@@ -50,6 +50,10 @@ func main() {
 	router.GET("/getCollections", controllers.GetCollections)
 	router.GET("/getSubscribers", controllers.GetSubscribers)
 	router.GET("/getSubscribedTo", controllers.GetSubscribedTo)
+	router.GET("/getPublicWorks", controllers.GetPublicWorks)
+	router.GET("/getWorks", controllers.GetWorks)
+	router.GET("/getAvatar", controllers.GetAvatar)
+	router.GET("/changePrivacy", controllers.ChangePrivacy)
 	
 
 	router.Run("0.0.0.0:8080")
