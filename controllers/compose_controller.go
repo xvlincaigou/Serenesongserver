@@ -36,9 +36,6 @@ func GetFormat(c *gin.Context) {
 }
 
 func FinishWork(c *gin.Context) {
-	// // Get the new work & the token from the query string
-	// new_work := c.Query("new_work")
-	// token := c.Query("token")
 	// Get the data from the request body.
 	var json_data map[string]interface{}
 	if err := c.ShouldBindJSON(&json_data); err != nil {
@@ -52,13 +49,6 @@ func FinishWork(c *gin.Context) {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
 		return
 	}
-	// // Extract the work data to JSON
-	// var work_data bson.M
-	// err := json.Unmarshal([]byte(new_work), &work_data)
-	// if err!= nil {
-	// 	utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
-	// 	return
-	// }
 	services.SaveWork(c, work, token)
 }
 
