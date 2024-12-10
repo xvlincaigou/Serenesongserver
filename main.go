@@ -46,6 +46,7 @@ func main() {
 	router.GET("/getMyWorks", controllers.GetMyWorks)
 	router.GET("/getCiById", controllers.GetCiById)
 	// User info related APIs
+	router.POST("/saveUserInfo", controllers.SaveUserInfo)
 	router.GET("/getDynamics", controllers.GetDynamics)
 	router.GET("/getCollections", controllers.GetCollections)
 	router.GET("/getSubscribers", controllers.GetSubscribers)

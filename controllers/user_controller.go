@@ -4,15 +4,19 @@ import (
 	// "Serenesongserver/models"
 	"Serenesongserver/services"
 	"Serenesongserver/utils"
+	// "os/user"
+
 	// "go/token"
 
 	// "encoding/json"
 	"net/http"
 	"strconv"
+
 	// "encoding/json"
 	// "fmt"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	// "go.mongodb.org/mongo-driver/bson"
 	// "go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -100,4 +104,22 @@ func ChangePrivacy(c *gin.Context) {
         return
     }
 	services.ChangePrivacy(c, work_id, token, is_public)
+}
+
+func SaveUserInfo(c *gin.Context) {
+	// Get the data from the request body.
+	var json_data bson.M
+	if err := c.ShouldBindJSON(&json_data); err != nil {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
+		return
+	}
+	// Extract the token and the draft data from the JSON.
+	token, token_ok   := json_data["token"].(string)
+	avatar, avatar_ok := json_data["avatar"].(string)
+	name, name_ok     := json_data["name"].(string)
+	if !token_ok || !avatar_ok || !name_ok {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
+		return
+	}
+	services.SaveNameAvatar(c, token, name, avatar)
 }
