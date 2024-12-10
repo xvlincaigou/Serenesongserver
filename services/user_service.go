@@ -93,7 +93,18 @@ func ReturnSubscribers(c *gin.Context, token string) {
 		return
 	}
 	// Return subscribers of the user
-	subscribers := user.Subscribers
+	var subscribers []models.User
+	// Get user by ID and hide sensitive information
+	for _, user_id := range user.Subscribers {
+		var user models.User
+		err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"_id": user_id}).Decode(&user)
+		if err != nil {
+			utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoFind, err)
+			return
+		}
+		user.Token = ""
+		subscribers = append(subscribers, user)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"subscribers": subscribers,
 	})
@@ -108,7 +119,18 @@ func ReturnSubscribedTo(c *gin.Context, token string) {
 		return
 	}
 	// Return subscribes of the user
-	subscribed_to := user.SubscribedTo
+	var subscribed_to []models.User
+	// Get user by ID and hide sensitive information
+	for _, user_id := range user.SubscribedTo {
+		var user models.User
+		err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"_id": user_id}).Decode(&user)
+		if err != nil {
+			utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoFind, err)
+			return
+		}
+		user.Token = ""
+		subscribed_to = append(subscribed_to, user)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"subscribed_to": subscribed_to,
 	})
