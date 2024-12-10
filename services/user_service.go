@@ -5,6 +5,9 @@ import (
 	// "fmt"
 	// "log"
 	// "time"
+	"os"
+	"encoding/base64"
+	"path/filepath"
 
 	"Serenesongserver/config"
 	"Serenesongserver/models"
@@ -41,7 +44,8 @@ func ReturnDynamics(c *gin.Context, user_id string, token string) {
 		return
 	}
 	// Return dynamics of the target user
-	dynamics := target_user.Dynamics
+	var dynamics []models.ModernWork
+	// := target_user.Dynamics
 	c.JSON(http.StatusOK, gin.H{
 		"dynamics": dynamics,
 	})
@@ -103,6 +107,7 @@ func ReturnSubscribers(c *gin.Context, token string) {
 			return
 		}
 		user.Token = ""
+		user.SessionKey = ""
 		subscribers = append(subscribers, user)
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -129,6 +134,7 @@ func ReturnSubscribedTo(c *gin.Context, token string) {
 			return
 		}
 		user.Token = ""
+		user.SessionKey = ""
 		subscribed_to = append(subscribed_to, user)
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -234,7 +240,17 @@ func ReturnAvatar(c *gin.Context, user_id string, token string) {
 		return
 	}
 	// Return avatar of the target user
-	c.JSON(http.StatusOK, gin.H{"avatar": target_user.Avatar})
+	// TODO: Return the base64 encoded image data
+	// The "Avater" field in target_user is a path to the avatar file, not the image data itself
+	picture, err := os.ReadFile(target_user.Avatar)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, "Failed to read avatar file", err)
+		return
+	}
+	// Encode the image data as base64
+	encoded := base64.StdEncoding.EncodeToString(picture)
+	// Return the base64 encoded image data
+	c.JSON(http.StatusOK, gin.H{"avatar": encoded})
 }
 
 func ChangePrivacy(c *gin.Context, work_id string, token string, is_public bool) {
@@ -257,5 +273,56 @@ func ChangePrivacy(c *gin.Context, work_id string, token string, is_public bool)
 		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Privacy changed successfully"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Privacy changed successfully!",
+	})
+}
+
+func SaveNameAvatar(c *gin.Context, token string, name string, avatar string) {
+	// Verify user token
+	var user models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgInvalidToken, err)
+		return
+	}
+	// Update user name and avatar
+	// Make sure the avatar directory exists
+	folder := "/data/TsingpingYue/avatars"
+	if err := os.MkdirAll(folder, 0755); err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, "Failed to create avatar directory", err)
+		return
+	}
+	// Decode the base64 encoded image data
+	picture, err := base64.StdEncoding.DecodeString(avatar)
+	if err != nil {
+		utils.HandleError(c, http.StatusBadRequest, "Invalid avatar data", err)
+		return
+	}
+	// Save the avatar to the directory
+	path := filepath.Join(folder, user.ID.Hex() + ".png")
+	err = os.WriteFile(path, picture, 0644)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, "Failed to save avatar file", err)
+		return
+	}
+	// Update user name and avatar in the database
+	_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(
+		c,
+		bson.M{"token": token}, 
+		bson.M{
+			"$set": bson.M{
+				"name":   name,
+				"avatar": path,
+			},
+		},
+	)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
+		return
+	}
+	// Return success message
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User name and avatar updated successfully!",
+	})
 }
