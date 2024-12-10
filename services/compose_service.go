@@ -120,46 +120,46 @@ func ReturnFormat(c *gin.Context, cipai_name string, format_num int) {
 	c.JSON(http.StatusOK, gin.H{"error": "No formats field found in any matching document"})
 }
 
-func SaveWork(c *gin.Context, work bson.M, token string) {
-	// Verify user token
-	var user models.User
-	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
-	if err != nil {
-		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
-		return
-	}
-	// Save work to database
-	user_work := models.ModernWork{
-		ID:        primitive.NewObjectID(),
-		Author:    work["author"].(primitive.ObjectID),
-		Title:     work["title"].(string),
-		Content:   utils.ToStringArray(work["content"]),
-		Cipai:     utils.ToStringArray(work["cipai"]),
-		Xiaoxu:    work["xiaoxu"].(string),
-		IsPublic:  work["is_public"].(bool),
-		Tags:      utils.ToStringArray(work["tags"]),
-		CreatedAt: work["created_at"].(time.Time),
-		UpdatedAt: time.Now(),
-	}
-	collection := config.MongoClient.Database("serenesong").Collection("UserWorks")
-	_, err = collection.InsertOne(c, user_work)
-	if err != nil {
-		utils.HandleError(c, http.StatusInternalServerError, "Failed to save work", err)
-		return
-	}
-	// Update user's recent works
-	user.CiWritten = append(user.CiWritten, user_work.ID)
-	_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(c, bson.M{"token": token}, bson.M{"$set": bson.M{"recent_works": user.CiWritten}})
-	if err != nil {
-		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
-		return
-	}
+// func SaveWork(c *gin.Context, work bson.M, token string) {
+// 	// Verify user token
+// 	var user models.User
+// 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+// 	if err != nil {
+// 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
+// 		return
+// 	}
+// 	// Save work to database
+// 	user_work := models.ModernWork{
+// 		ID:        primitive.NewObjectID(),
+// 		Author:    work["author"].(primitive.ObjectID),
+// 		Title:     work["title"].(string),
+// 		Content:   utils.ToStringArray(work["content"]),
+// 		Cipai:     utils.ToStringArray(work["cipai"]),
+// 		Xiaoxu:    work["xiaoxu"].(string),
+// 		IsPublic:  work["is_public"].(bool),
+// 		Tags:      utils.ToStringArray(work["tags"]),
+// 		CreatedAt: work["created_at"].(time.Time),
+// 		UpdatedAt: time.Now(),
+// 	}
+// 	collection := config.MongoClient.Database("serenesong").Collection("UserWorks")
+// 	_, err = collection.InsertOne(c, user_work)
+// 	if err != nil {
+// 		utils.HandleError(c, http.StatusInternalServerError, "Failed to save work", err)
+// 		return
+// 	}
+// 	// Update user's recent works
+// 	user.CiWritten = append(user.CiWritten, user_work.ID)
+// 	_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(c, bson.M{"token": token}, bson.M{"$set": bson.M{"recent_works": user.CiWritten}})
+// 	if err != nil {
+// 		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Work saved successfully",
-		"work_id": user_work.ID.Hex(),
-	})
-}
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"message": "Work saved successfully",
+// 		"work_id": user_work.ID.Hex(),
+// 	})
+// }
 
 func PutIntoDraftsHandler(c *gin.Context, token string, draftObj models.ModernWork) {
 	// 1. 先获取用户信息以获取用户ID
@@ -281,7 +281,7 @@ func TurnToFormalHandler(c *gin.Context, token string, draftID string) {
 
 			// Save work to database
 			draftObj.Author = user.ID
-			draftObj.IsPublic = true
+			draftObj.IsPublic = false
 			insertResult, err := config.MongoClient.Database("serenesong").Collection("UserWorks").InsertOne(c, draftObj)
 			if err != nil {
 				utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoInsert, err)

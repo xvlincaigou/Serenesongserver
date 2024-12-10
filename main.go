@@ -37,7 +37,7 @@ func main() {
 	router.GET("/getRhymes", controllers.GetRhymes)
 	router.GET("/getYunshu", controllers.GetYunshu)
 	router.GET("/getFormat", controllers.GetFormat)
-	router.POST("/doneWork", controllers.FinishWork)
+	// router.POST("/doneWork", controllers.FinishWork)
 	router.POST("/putIntoDrafts", controllers.PutIntoDrafts)
 	router.DELETE("/delDraft", controllers.DelDraft)
 	router.POST("/turnToFormal", controllers.TurnToFormal)
@@ -54,7 +54,6 @@ func main() {
 	router.GET("/getWorks", controllers.GetWorks)
 	router.GET("/getAvatar", controllers.GetAvatar)
 	router.GET("/changePrivacy", controllers.ChangePrivacy)
-	
 
 	router.Run("0.0.0.0:8080")
 }
