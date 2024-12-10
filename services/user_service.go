@@ -22,6 +22,66 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func UnpackDynamics(c *gin.Context, dynamics []primitive.ObjectID) []models.DynamicContent {
+	var dynamic_contents []models.DynamicContent
+	for _, dynamic_id := range dynamics {
+		var dynamic models.Dynamic
+		err := config.MongoClient.Database("serenesong").Collection("Dynamics").FindOne(c, bson.M{"_id": dynamic_id}).Decode(&dynamic)
+		if err != nil {
+			utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+			return nil
+		}
+		// Find the content of the dynamic using the dynamic type and the corresponding ID
+		var content models.DynamicContent
+		// Process dynamic content of different types
+		if dynamic.Type == 0 {	// Classic masterpiece
+			// var classic models.Ci
+			err = config.MongoClient.Database("serenesong").Collection("Ci").FindOne(c, bson.M{"_id": dynamic.CiId}).Decode(&content.Classic)
+			if err != nil {
+				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+				return nil
+			}
+			// Pack the content and the comments
+			content.Type = 0
+		} else if dynamic.Type == 1 {	// Modern works
+			// var modern models.ModernWork
+			err = config.MongoClient.Database("serenesong").Collection("UserWorks").FindOne(c, bson.M{"_id": dynamic.UserWorkId}).Decode(&content.Modern)
+			if err != nil {
+				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+				return nil
+			}
+			// Pack the content and the comments
+			content.Type = 1
+		} else if dynamic.Type == 2 {	// Collections
+			// var collection models.Collection
+			err = config.MongoClient.Database("serenesong").Collection("CollectionItems").FindOne(c, bson.M{"_id": dynamic.CollectionItemId}).Decode(&content.Item)
+			if err != nil {
+				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+				return nil
+			}
+			// Pack the content and the comments
+			content.Type = 2
+		} else {
+			utils.HandleError(c, http.StatusBadRequest, "Invalid dynamic type", nil)
+			return nil
+		}
+		// Fetch the comments
+		for _, comment_id := range dynamic.Comments {
+			var comment models.Comment
+			err = config.MongoClient.Database("serenesong").Collection("Comments").FindOne(c, bson.M{"_id": comment_id}).Decode(&comment)
+			if err != nil {
+				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+				return nil
+			}
+			content.Comments = append(content.Comments, comment)
+		}
+		// Append the content to the dynamic_contents array
+		dynamic_contents = append(dynamic_contents, content)
+	}
+	// Return the dynamic_contents array
+	return dynamic_contents
+}
+
 func ReturnDynamics(c *gin.Context, user_id string, token string) {
 	// Verify user token
 	var user models.User
@@ -43,12 +103,12 @@ func ReturnDynamics(c *gin.Context, user_id string, token string) {
 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
-	// Return dynamics of the target user
-	var dynamics []models.ModernWork
-	// := target_user.Dynamics
-	c.JSON(http.StatusOK, gin.H{
-		"dynamics": dynamics,
-	})
+	// Unpack the dynamic IDs and fetch the corresponding content
+	var dynamics = UnpackDynamics(c, target_user.Dynamics)
+	if  dynamics != nil { 
+		// Return dynamics of the target user
+		c.JSON(http.StatusOK, gin.H{"dynamics": dynamics})
+	}
 }
 
 func ReturnCollections(c *gin.Context, user_id string, token string) {
@@ -78,7 +138,7 @@ func ReturnCollections(c *gin.Context, user_id string, token string) {
 		var collection models.Collection
 		err = config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": collection_id}).Decode(&collection)
 		if err != nil {
-			utils.HandleError(c, http.StatusNotFound, "Collection not found", err)
+			utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 			return
 		}
 		collections = append(collections, collection)

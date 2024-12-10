@@ -16,7 +16,7 @@ type User struct {
 	Collections          []primitive.ObjectID `bson:"collections"`           // 这里我们只存放id列表，具体的收藏的诗词存放在Collections中
 	SubscribedTo         []primitive.ObjectID `bson:"subscribed_to"`         // 用户订阅的用户ID列表
 	Subscribers          []primitive.ObjectID `bson:"subscribers"`           // 订阅本用户的用户ID列表
-	Dynamics             []Dynamic            `bson:"dynamics"`              // 用户动态列表
+	Dynamics             []primitive.ObjectID `bson:"dynamics"`              // 用户动态列表
 	Drafts               []primitive.ObjectID `bson:"drafts"`                // 用户的草稿箱，这个我们选择在用户中嵌入，因为草稿箱是用户私有的
 	PrivateConversations []primitive.ObjectID `bson:"private_conversations"` // 用户的私信会话列表，仍然只存放id
 }
@@ -32,7 +32,7 @@ func NewUser(openID, sessionKey, token string) User {
 		Collections:          []primitive.ObjectID{},
 		SubscribedTo:         []primitive.ObjectID{},
 		Subscribers:          []primitive.ObjectID{},
-		Dynamics:             []Dynamic{},
+		Dynamics:             []primitive.ObjectID{},
 		Drafts:               []primitive.ObjectID{},
 		PrivateConversations: []primitive.ObjectID{},
 	}
