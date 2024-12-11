@@ -47,6 +47,7 @@ func main() {
 	router.GET("/getCiById", controllers.GetCiById)
 	// User info related APIs
 	router.POST("/saveUserInfo", controllers.SaveUserInfo)
+	router.POST("/changePrivacy", controllers.ChangePrivacy)
 	router.GET("/getDynamics", controllers.GetDynamics)
 	router.GET("/getCollections", controllers.GetCollections)
 	router.GET("/getSubscribers", controllers.GetSubscribers)
@@ -54,7 +55,6 @@ func main() {
 	router.GET("/getPublicWorks", controllers.GetPublicWorks)
 	router.GET("/getWorks", controllers.GetWorks)
 	router.GET("/getUserInfo", controllers.GetUserInfo)
-	router.GET("/changePrivacy", controllers.ChangePrivacy)
 	router.GET("/getPersonalID", controllers.GetPersonalID)
 
 	router.Run("0.0.0.0:8080")
