@@ -10,7 +10,7 @@ import (
 
 	// "encoding/json"
 	"net/http"
-	"strconv"
+	// "strconv"
 
 	// "encoding/json"
 	// "fmt"
@@ -96,20 +96,15 @@ func ChangePrivacy(c *gin.Context) {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
 		return
 	}
+	// Extract the token and the work_id from the JSON.
 	work_id, work_ok    := json_data["work_id"].(string)
 	token, token_ok 	:= json_data["token"].(string)
-	privacy, privacy_ok := json_data["privacy"].(string)
+	privacy, privacy_ok := json_data["privacy"].(bool)
 	if !work_ok || !token_ok || !privacy_ok {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
 		return
 	}
-	// Parse the 'privacy' parameter to a boolean
-    is_public, err := strconv.ParseBool(privacy)
-    if err != nil {
-        utils.HandleError(c, http.StatusBadRequest, "Invalid privacy value. Must be a boolean.", nil)
-        return
-    }
-	services.ChangePrivacy(c, work_id, token, is_public)
+	services.ChangePrivacy(c, work_id, token, privacy)
 }
 
 func SaveUserInfo(c *gin.Context) {
