@@ -79,14 +79,14 @@ func GetWorks(c *gin.Context) {
 	services.ReturnWorks(c, user_id, token)
 }
 
-func GetAvatar(c *gin.Context) {
+func GetUserInfo(c *gin.Context) {
 	user_id := c.Query("user_id")
 	token := c.Query("token")
 	if user_id == "" || token == "" {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
-	services.ReturnAvatar(c, user_id, token)
+	services.ReturnUserInfo(c, user_id, token)
 }
 
 func ChangePrivacy(c *gin.Context) {
@@ -117,9 +117,10 @@ func SaveUserInfo(c *gin.Context) {
 	token, token_ok   := json_data["token"].(string)
 	avatar, avatar_ok := json_data["avatar"].(string)
 	name, name_ok     := json_data["name"].(string)
-	if !token_ok || !avatar_ok || !name_ok {
+	signature, sig_ok := json_data["signature"].(string)
+	if !token_ok || !avatar_ok || !name_ok || !sig_ok {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
 		return
 	}
-	services.SaveNameAvatar(c, token, name, avatar)
+	services.SaveNameAvatar(c, token, name, avatar, signature)
 }
