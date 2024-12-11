@@ -90,11 +90,17 @@ func GetUserInfo(c *gin.Context) {
 }
 
 func ChangePrivacy(c *gin.Context) {
-	work_id := c.Query("work_id")
-	token := c.Query("token")
-	privacy := c.Query("privacy")
-	if work_id == "" || token == "" || privacy == "" {
-		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
+	// Get the data from the request body.
+	var json_data bson.M
+	if err := c.ShouldBindJSON(&json_data); err != nil {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
+		return
+	}
+	work_id, work_ok    := json_data["work_id"].(string)
+	token, token_ok 	:= json_data["token"].(string)
+	privacy, privacy_ok := json_data["privacy"].(string)
+	if !work_ok || !token_ok || !privacy_ok {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
 		return
 	}
 	// Parse the 'privacy' parameter to a boolean
