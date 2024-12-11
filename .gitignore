@@ -20,6 +20,8 @@
 # Go workspace file
 go.work
 go.work.sum
+# log file
+server.log
 
 # env file
 .env
