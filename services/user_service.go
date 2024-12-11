@@ -54,7 +54,7 @@ func UnpackDynamics(c *gin.Context, dynamics []primitive.ObjectID) []models.Dyna
 			content.Type = 1
 		} else if dynamic.Type == 2 {	// Collections
 			// var collection models.Collection
-			err = config.MongoClient.Database("serenesong").Collection("CollectionItems").FindOne(c, bson.M{"_id": dynamic.CollectionItemId}).Decode(&content.Item)
+			err = config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": dynamic.CollectionItemId}).Decode(&content.Item)
 			if err != nil {
 				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 				return nil
@@ -278,7 +278,7 @@ func ReturnWorks(c *gin.Context, user_id string, token string) {
 	c.JSON(http.StatusOK, gin.H{"public_works": public_works})
 }
 
-func ReturnAvatar(c *gin.Context, user_id string, token string) {
+func ReturnUserInfo(c *gin.Context, user_id string, token string) {
 	// Verify user token
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
@@ -310,7 +310,11 @@ func ReturnAvatar(c *gin.Context, user_id string, token string) {
 	// Encode the image data as base64
 	encoded := base64.StdEncoding.EncodeToString(picture)
 	// Return the base64 encoded image data
-	c.JSON(http.StatusOK, gin.H{"avatar": encoded})
+	c.JSON(http.StatusOK, gin.H{
+		"avatar": encoded,
+		"name":   target_user.Name,
+		"signature": target_user.Signature,
+	})
 }
 
 func ChangePrivacy(c *gin.Context, work_id string, token string, is_public bool) {
@@ -338,7 +342,7 @@ func ChangePrivacy(c *gin.Context, work_id string, token string, is_public bool)
 	})
 }
 
-func SaveNameAvatar(c *gin.Context, token string, name string, avatar string) {
+func SaveNameAvatar(c *gin.Context, token string, name string, avatar string, signature string) {
 	// Verify user token
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
@@ -374,6 +378,7 @@ func SaveNameAvatar(c *gin.Context, token string, name string, avatar string) {
 			"$set": bson.M{
 				"name":   name,
 				"avatar": path,
+				"signature": signature,
 			},
 		},
 	)

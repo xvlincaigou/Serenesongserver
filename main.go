@@ -53,7 +53,7 @@ func main() {
 	router.GET("/getSubscribedTo", controllers.GetSubscribedTo)
 	router.GET("/getPublicWorks", controllers.GetPublicWorks)
 	router.GET("/getWorks", controllers.GetWorks)
-	router.GET("/getAvatar", controllers.GetAvatar)
+	router.GET("/getUserInfo", controllers.GetUserInfo)
 	router.GET("/changePrivacy", controllers.ChangePrivacy)
 
 	router.Run("0.0.0.0:8080")

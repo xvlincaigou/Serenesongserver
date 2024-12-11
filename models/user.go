@@ -9,6 +9,7 @@ type User struct {
 	Token      string             `bson:"token"`       // 用户的Token，这是我们自己生成的、用于用户登录验证的令牌
 	Name       string             `bson:"name"`        // 用户的名称
 	Avatar 	   string 			  `bson:"avatar"` 	   // 头像保存的路径。当然这个可能之后不再需要，这个要看微信接口接的怎么样。
+	Signature  string             `bson:"signature"`   // 用户的签名
 
 	// 这里的 CiWritten 是用户的诗词创作记录。对于这些词，我们只保存ID，具体的诗词内容存放在Ci中
 	CiWritten []primitive.ObjectID `bson:"ci_written"`
