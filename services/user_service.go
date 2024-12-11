@@ -391,3 +391,17 @@ func SaveNameAvatar(c *gin.Context, token string, name string, avatar string, si
 		"message": "User name and avatar updated successfully!",
 	})
 }
+
+func ReturnPersonalID(c *gin.Context, token string) {
+	// Verify user token
+	var user models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgInvalidToken, err)
+		return
+	}
+	// Return personal ID of the user
+	c.JSON(http.StatusOK, gin.H{
+		"personal_id": user.ID,
+	})
+}

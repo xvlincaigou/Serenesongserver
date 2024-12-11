@@ -125,3 +125,12 @@ func SaveUserInfo(c *gin.Context) {
 	}
 	services.SaveNameAvatar(c, token, name, avatar, signature)
 }
+
+func GetPersonalID(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
+		return
+	}
+	services.ReturnPersonalID(c, token)
+}
