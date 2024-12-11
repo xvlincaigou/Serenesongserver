@@ -55,6 +55,7 @@ func main() {
 	router.GET("/getWorks", controllers.GetWorks)
 	router.GET("/getUserInfo", controllers.GetUserInfo)
 	router.GET("/changePrivacy", controllers.ChangePrivacy)
+	router.GET("/getPersonalID", controllers.GetPersonalID)
 
 	router.Run("0.0.0.0:8080")
 }
