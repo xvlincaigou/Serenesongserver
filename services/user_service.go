@@ -299,10 +299,12 @@ func ReturnUserInfo(c *gin.Context, user_id string, token string) {
 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
-	// Return avatar of the target user
-	// TODO: Return the base64 encoded image data
 	// The "Avater" field in target_user is a path to the avatar file, not the image data itself
-	picture, err := os.ReadFile(target_user.Avatar)
+	avatar := target_user.Avatar
+	if avatar == "" {
+		avatar = "/tmp/TsingpingYue/avatars/avatar.png"
+	}
+	picture, err := os.ReadFile(avatar)
 	if err != nil {
 		utils.HandleError(c, http.StatusInternalServerError, "Failed to read avatar file", err)
 		return
