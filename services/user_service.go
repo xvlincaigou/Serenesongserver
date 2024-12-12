@@ -352,7 +352,7 @@ func SaveNameAvatar(c *gin.Context, token string, name string, avatar string, si
 	}
 	// Update user name and avatar
 	// Make sure the avatar directory exists
-	folder := "/data/TsingpingYue/avatars"
+	folder := "/tmp/TsingpingYue/avatars"
 	if err := os.MkdirAll(folder, 0755); err != nil {
 		utils.HandleError(c, http.StatusInternalServerError, "Failed to create avatar directory", err)
 		return
