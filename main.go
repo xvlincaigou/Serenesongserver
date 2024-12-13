@@ -56,6 +56,8 @@ func main() {
 	router.GET("/getWorks", controllers.GetWorks)
 	router.GET("/getUserInfo", controllers.GetUserInfo)
 	router.GET("/getPersonalID", controllers.GetPersonalID)
+	// Community related APIs
+	router.POST("/publishDynamic", controllers.PublishDynamic)
 
 	router.Run("0.0.0.0:8080")
 }
