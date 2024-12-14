@@ -22,21 +22,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func UnpackDynamics(c *gin.Context, dynamics []primitive.ObjectID) []models.DynamicContent {
+func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicContent {
 	var dynamic_contents []models.DynamicContent
-	for _, dynamic_id := range dynamics {
-		var dynamic models.Dynamic
-		err := config.MongoClient.Database("serenesong").Collection("Dynamics").FindOne(c, bson.M{"_id": dynamic_id}).Decode(&dynamic)
-		if err != nil {
-			utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
-			return nil
-		}
+	for _, dynamic := range dynamics {
 		// Find the content of the dynamic using the dynamic type and the corresponding ID
 		var content models.DynamicContent
 		// Process dynamic content of different types
 		if dynamic.Type == 0 {	// Classic masterpiece
 			// var classic models.Ci
-			err = config.MongoClient.Database("serenesong").Collection("Ci").FindOne(c, bson.M{"_id": dynamic.CiId}).Decode(&content.Classic)
+			err := config.MongoClient.Database("serenesong").Collection("Ci").FindOne(c, bson.M{"_id": dynamic.CiId}).Decode(&content.Classic)
 			if err != nil {
 				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 				return nil
@@ -45,7 +39,7 @@ func UnpackDynamics(c *gin.Context, dynamics []primitive.ObjectID) []models.Dyna
 			content.Type = 0
 		} else if dynamic.Type == 1 {	// Modern works
 			// var modern models.ModernWork
-			err = config.MongoClient.Database("serenesong").Collection("UserWorks").FindOne(c, bson.M{"_id": dynamic.UserWorkId}).Decode(&content.Modern)
+			err := config.MongoClient.Database("serenesong").Collection("UserWorks").FindOne(c, bson.M{"_id": dynamic.UserWorkId}).Decode(&content.Modern)
 			if err != nil {
 				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 				return nil
@@ -54,7 +48,7 @@ func UnpackDynamics(c *gin.Context, dynamics []primitive.ObjectID) []models.Dyna
 			content.Type = 1
 		} else if dynamic.Type == 2 {	// Collections
 			// var collection models.Collection
-			err = config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": dynamic.CollectionItemId}).Decode(&content.Item)
+			err := config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": dynamic.CollectionItemId}).Decode(&content.Item)
 			if err != nil {
 				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 				return nil
@@ -68,13 +62,15 @@ func UnpackDynamics(c *gin.Context, dynamics []primitive.ObjectID) []models.Dyna
 		// Fetch the comments
 		for _, comment_id := range dynamic.Comments {
 			var comment models.Comment
-			err = config.MongoClient.Database("serenesong").Collection("Comments").FindOne(c, bson.M{"_id": comment_id}).Decode(&comment)
+			err := config.MongoClient.Database("serenesong").Collection("Comments").FindOne(c, bson.M{"_id": comment_id}).Decode(&comment)
 			if err != nil {
-				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+				utils.HandleError(c, http.StatusNotFound, comment_id.Hex(), err)
 				return nil
 			}
 			content.Comments = append(content.Comments, comment)
 		}
+		// Fetch the likes
+		content.Likes = dynamic.Likes
 		// Append the content to the dynamic_contents array
 		dynamic_contents = append(dynamic_contents, content)
 	}
@@ -104,7 +100,17 @@ func ReturnDynamics(c *gin.Context, user_id string, token string) {
 		return
 	}
 	// Unpack the dynamic IDs and fetch the corresponding content
-	var dynamics = UnpackDynamics(c, target_user.Dynamics)
+	var dynamic_indices []models.Dynamic
+	for _, dynamic_id := range target_user.Dynamics {
+		var dynamic models.Dynamic
+		err := config.MongoClient.Database("serenesong").Collection("Dynamics").FindOne(c, bson.M{"_id": dynamic_id}).Decode(&dynamic)
+		if err != nil {
+			utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+			return
+		}
+		dynamic_indices = append(dynamic_indices, dynamic)
+	}
+	var dynamics = UnpackDynamics(c, dynamic_indices)
 	if  dynamics != nil { 
 		// Return dynamics of the target user
 		c.JSON(http.StatusOK, gin.H{"dynamics": dynamics})
