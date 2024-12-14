@@ -21,6 +21,7 @@ type Dynamic struct {
 	CollectionItemId primitive.ObjectID `bson:"collection_item_id"`
 	// 这个动态下面的评论
 	Comments []primitive.ObjectID `bson:"comments"`
+	Likes    []primitive.ObjectID `bson:"likes"`
 }
 
 type DynamicContent struct {
@@ -36,4 +37,5 @@ type DynamicContent struct {
 	Item CollectionItem `bson:"collection_item"`
 	// 这个动态下面的评论
 	Comments []Comment `bson:"comments"`
+	Likes    []primitive.ObjectID `bson:"likes"`
 }

@@ -58,6 +58,13 @@ func main() {
 	router.GET("/getPersonalID", controllers.GetPersonalID)
 	// Community related APIs
 	router.POST("/publishDynamic", controllers.PublishDynamic)
+	router.POST("/commentPost", controllers.CommentPost)
+	router.POST("/withdrawComment", controllers.WithdrawComment)
+	router.POST("/withdrawPost", controllers.WithdrawPost)
+	router.POST("/likePost", controllers.LikePost)
+	router.POST("/withdrawLike", controllers.WithdrawLike)
+	router.GET("/getRandomPosts", controllers.GetRandomPosts)
+	router.GET("/getFollowingPosts", controllers.GetFollowingPosts)
 
 	router.Run("0.0.0.0:8080")
 }
