@@ -31,6 +31,8 @@ func PublishDynamicHandler(c *gin.Context, token string, Type int, _id string) {
 	dynamic.UserWorkId = primitive.ObjectID{}
 	dynamic.CollectionItemId = primitive.ObjectID{}
 	dynamic.Comments = []primitive.ObjectID{}
+	dynamic.Likes = []primitive.ObjectID{}
+	
 	switch Type {
 	case models.DYNAMIC_TYPE_CI:
 		dynamic.CiId, err = primitive.ObjectIDFromHex(_id)
