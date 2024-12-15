@@ -14,7 +14,7 @@ services:
     ports:
       - "27017:27017"
     healthcheck:
-      test: ["CMD", "mongo", "--username", "root", "--password", "example", "--authenticationDatabase", "admin", "--eval", "db.runCommand({ ping: 1 })"]
+      test: ["CMD", "mongosh", "--username", "root", "--password", "example", "--authenticationDatabase", "admin", "--eval", "db.runCommand({ ping: 1 })"]
       interval: 10s
       timeout: 5s
       retries: 3
