@@ -16,8 +16,10 @@ func main() {
 
 	router := gin.Default()
 
+	// Login related APIs
 	router.POST("/login", controllers.Login)
 
+	// Collection related APIs
 	router.GET("/getAllCollections", controllers.GetAllColletions)
 	router.GET("/getAllColletionItems", controllers.GetAllColletionItems)
 	router.POST("/createCollection", controllers.CreateCollection)
@@ -28,6 +30,7 @@ func main() {
 	router.GET("/getCollectionItemCount", controllers.GetCollectionItemCount)
 	router.GET("/getCollectionItem", controllers.GetCollectionItem)
 
+	// Recommendation related APIs
 	router.GET("/recommendCi", controllers.RecommendCi)
 	router.GET("/recommendPic", controllers.RecommendPic)
 
@@ -37,7 +40,6 @@ func main() {
 	router.GET("/getRhymes", controllers.GetRhymes)
 	router.GET("/getYunshu", controllers.GetYunshu)
 	router.GET("/getFormat", controllers.GetFormat)
-	// router.POST("/doneWork", controllers.FinishWork)
 	router.POST("/putIntoDrafts", controllers.PutIntoDrafts)
 	router.DELETE("/delDraft", controllers.DelDraft)
 	router.POST("/turnToFormal", controllers.TurnToFormal)
@@ -65,6 +67,11 @@ func main() {
 	router.POST("/withdrawLike", controllers.WithdrawLike)
 	router.GET("/getRandomPosts", controllers.GetRandomPosts)
 	router.GET("/getFollowingPosts", controllers.GetFollowingPosts)
+
+	// Message related APIs
+	router.GET("/getMessagesIGet", controllers.GetMessagesIGet)
+	router.GET("/getMessagesISend", controllers.GetMessagesISend)
+	router.POST("/sendMessage", controllers.SendMessage)
 
 	router.Run("0.0.0.0:8080")
 }
