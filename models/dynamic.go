@@ -17,8 +17,10 @@ type Dynamic struct {
 	CiId primitive.ObjectID `bson:"ci_id"`
 	// 在type为1的时候，这个字段是对应的现在作品的id。
 	UserWorkId primitive.ObjectID `bson:"user_work_id"`
-	// 在type为2的时候，这个字段是对应的收藏夹item的id。
-	CollectionItemId primitive.ObjectID `bson:"collection_item_id"`
+	// 在type为2的时候，这个字段是对应的收藏夹的id。
+	CollectionId primitive.ObjectID `bson:"collection_id"`
+	// 在type为2的时候，这个字段是对应的收藏对应的词的id。
+	CollectionCiId primitive.ObjectID `bson:"collection_ci_id"`
 	// 这个动态下面的评论
 	Comments []primitive.ObjectID `bson:"comments"`
 	Likes    []primitive.ObjectID `bson:"likes"`
@@ -33,9 +35,10 @@ type DynamicContent struct {
 	Classic Ci `bson:"classic"`
 	// 在type为1的时候，这个字段是对应的现在作品的id。
 	Modern ModernWork `bson:"modern"`
-	// 在type为2的时候，这个字段是对应的收藏夹item的id。
-	Item CollectionItem `bson:"collection_item"`
+	// 在type为2的时候，这个字段是对应的收藏夹对应的词。
+	CollectionCi Ci     `bson:"collection_ci"`
+	Comment      string `bson:"comment"`
 	// 这个动态下面的评论
-	Comments []Comment `bson:"comments"`
+	Comments []Comment            `bson:"comments"`
 	Likes    []primitive.ObjectID `bson:"likes"`
 }

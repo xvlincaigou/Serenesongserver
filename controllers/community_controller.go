@@ -22,13 +22,14 @@ func PublishDynamic(c *gin.Context) {
 	token, tokenOk := jsonData["token"].(string)
 	_Type, _TypeOk := jsonData["Type"].(float64)
 	_id, _idOk := jsonData["_id"].(string)
+	_id2, _id2Ok := jsonData["_id2"].(string)
 
-	if !tokenOk || !_TypeOk || !_idOk {
+	if !tokenOk || !_TypeOk || !_idOk || !_id2Ok {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
 	Type := int(_Type)
-	services.PublishDynamicHandler(c, token, Type, _id)
+	services.PublishDynamicHandler(c, token, Type, _id, _id2)
 }
 
 func WithdrawPost(c *gin.Context) {
@@ -82,9 +83,9 @@ func CommentPost(c *gin.Context) {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, err)
 		return
 	}
-	token, token_ok     := json_data["token"].(string)
+	token, token_ok := json_data["token"].(string)
 	content, content_ok := json_data["content"].(string)
-	post_id, post_ok    := json_data["post_id"].(string)
+	post_id, post_ok := json_data["post_id"].(string)
 	if !token_ok || !content_ok || !post_ok {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
@@ -98,7 +99,7 @@ func WithdrawComment(c *gin.Context) {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, err)
 		return
 	}
-	token, token_ok        := json_data["token"].(string)
+	token, token_ok := json_data["token"].(string)
 	comment_id, comment_ok := json_data["comment_id"].(string)
 	if !token_ok || !comment_ok {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
