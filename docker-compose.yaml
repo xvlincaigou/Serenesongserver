@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: mydb
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongo", "--username", "root", "--password", "example", "--authenticationDatabase", "admin", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  app:
+    build: .
+    container_name: serenesongserver
+    restart: always
+    environment:
+      MONGODB_URI: mongodb://root:example@mongodb:27017/mydb?authSource=admin
+    volumes:
+      - ./json_files:/app/json_files
+      - ./scripts:/app/scripts
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  python-loader:
+    image: python:3.9-alpine
+    container_name: python-loader
+    restart: "no"
+    volumes:
+      - ./json_files:/app/json_files
+      - ./scripts:/app/scripts
+    environment:
+      MONGODB_URI: mongodb://root:example@mongodb:27017/mydb?authSource=admin
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      app:
+        condition: service_started
+    entrypoint: ["python", "/app/scripts/load_json.py"]
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge
