@@ -5,8 +5,8 @@ import (
 	"Serenesongserver/models"
 	"Serenesongserver/utils"
 
-	"net/http"
 	"math/rand"
+	"net/http"
 	"sort"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func PublishDynamicHandler(c *gin.Context, token string, Type int, _id string) {
+func PublishDynamicHandler(c *gin.Context, token string, Type int, _id string, _id2 string) {
 	var user models.User
 	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
 	if err != nil {
@@ -29,17 +29,24 @@ func PublishDynamicHandler(c *gin.Context, token string, Type int, _id string) {
 	dynamic.Type = Type
 	dynamic.CiId = primitive.ObjectID{}
 	dynamic.UserWorkId = primitive.ObjectID{}
-	dynamic.CollectionItemId = primitive.ObjectID{}
+	dynamic.CollectionId = primitive.ObjectID{}
+	dynamic.CollectionCiId = primitive.ObjectID{}
 	dynamic.Comments = []primitive.ObjectID{}
 	dynamic.Likes = []primitive.ObjectID{}
-	
+
 	switch Type {
 	case models.DYNAMIC_TYPE_CI:
 		dynamic.CiId, err = primitive.ObjectIDFromHex(_id)
 	case models.DYNAMIC_TYPE_MODERN_WORK:
 		dynamic.UserWorkId, err = primitive.ObjectIDFromHex(_id)
 	case models.DYNAMIC_TYPE_COLLECTION_COMMENT:
-		dynamic.CollectionItemId, err = primitive.ObjectIDFromHex(_id)
+		var err1, err2 error
+		dynamic.CollectionId, err1 = primitive.ObjectIDFromHex(_id)
+		dynamic.CollectionCiId, err2 = primitive.ObjectIDFromHex(_id2)
+		if err1 != nil || err2 != nil {
+			utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidObjID, nil)
+			return
+		}
 	}
 	if err != nil {
 		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgInvalidObjID, err)
@@ -90,7 +97,7 @@ func DeletePost(c *gin.Context, token string, post_id string) {
 		return
 	}
 	// Check if the user is the author of the post
-	if dynamic.Author.Hex()!= user.ID.Hex() {
+	if dynamic.Author.Hex() != user.ID.Hex() {
 		utils.HandleError(c, http.StatusForbidden, "You are not the author of this post", err)
 		return
 	}
@@ -133,7 +140,7 @@ func ReturnRandomPosts(c *gin.Context, token string, value int) {
 	option.SetSort(bson.D{{Key: "_id", Value: -1}}) // 1 for ascending, -1 for descending
 	var dynamic_indices []models.Dynamic
 	// Fetch all posts from the "Dynamics" table
-	cursor, err := config.MongoClient.Database("serenesong").Collection("Dynamics").Find(c, bson.M{}, option); 
+	cursor, err := config.MongoClient.Database("serenesong").Collection("Dynamics").Find(c, bson.M{}, option)
 	if err != nil {
 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 		return
@@ -155,7 +162,7 @@ func ReturnRandomPosts(c *gin.Context, token string, value int) {
 		chosen_indices[i] = dynamic_indices[index]
 	}
 	dynamics := UnpackDynamics(c, chosen_indices)
-	if  dynamics != nil { 
+	if dynamics != nil {
 		// Return dynamics of the target user
 		c.JSON(http.StatusOK, gin.H{"dynamics": dynamics})
 	}
@@ -200,7 +207,7 @@ func ReturnFollowingPosts(c *gin.Context, user_id string, token string) {
 	}
 	// Unpack the posts and return
 	dynamics := UnpackDynamics(c, dynamic_indices)
-	if  dynamics != nil { 
+	if dynamics != nil {
 		// Return dynamics of the target user
 		c.JSON(http.StatusOK, gin.H{"dynamics": dynamics})
 	}
@@ -230,7 +237,7 @@ func SendComment(c *gin.Context, token string, content string, post_id string) {
 	comment := models.Comment{
 		DynamicId: dynamic_id,
 		Commenter: user.ID,
-		Content: content,
+		Content:   content,
 	}
 	// Insert the comment into the "Comments" table
 	result, err := config.MongoClient.Database("serenesong").Collection("Comments").InsertOne(c, comment)
@@ -248,7 +255,7 @@ func SendComment(c *gin.Context, token string, content string, post_id string) {
 	}
 	// Return the new comment
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Comment added successfully", 
+		"message": "Comment added successfully",
 		"comment": comment,
 	})
 }
@@ -323,9 +330,9 @@ func SendLike(c *gin.Context, token string, post_id string) {
 		if like.Hex() == user.ID.Hex() {
 			// utils.HandleError(c, http.StatusForbidden, "You have already liked this post", err)
 			c.JSON(http.StatusForbidden, gin.H{
-				"message": "You have already liked this post, nothing happened",
+				"message":    "You have already liked this post, nothing happened",
 				"dynamic_id": dynamic_id.Hex(),
-				"user_id": user.ID.Hex(),
+				"user_id":    user.ID.Hex(),
 			})
 			return
 		}
@@ -338,9 +345,9 @@ func SendLike(c *gin.Context, token string, post_id string) {
 	}
 	// Return success message
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Post liked successfully",
+		"message":    "Post liked successfully",
 		"dynamic_id": dynamic_id.Hex(),
-		"user_id": user.ID.Hex(),
+		"user_id":    user.ID.Hex(),
 	})
 }
 
@@ -375,9 +382,9 @@ func DeleteLike(c *gin.Context, token string, post_id string) {
 			}
 			// Return success message
 			c.JSON(http.StatusOK, gin.H{
-				"message": "Dismiss like successfully",
+				"message":    "Dismiss like successfully",
 				"dynamic_id": dynamic_id.Hex(),
-				"user_id": user.ID.Hex(),
+				"user_id":    user.ID.Hex(),
 			})
 			return
 		}
@@ -385,8 +392,8 @@ func DeleteLike(c *gin.Context, token string, post_id string) {
 	// If the user has not liked the post, return
 	// utils.HandleError(c, http.StatusForbidden, "You have not liked this post", err)
 	c.JSON(http.StatusForbidden, gin.H{
-		"message": "You have not liked this post, nothing happened",
+		"message":    "You have not liked this post, nothing happened",
 		"dynamic_id": dynamic_id.Hex(),
-		"user_id": user.ID.Hex(),
+		"user_id":    user.ID.Hex(),
 	})
 }
