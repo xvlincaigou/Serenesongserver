@@ -3,13 +3,13 @@ package models
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type User struct {
-	ID         primitive.ObjectID `bson:"_id"`         // 用户的ID，使用mongodb的ObjectId作为ID
-	OpenID     string             `bson:"openid"`      // 用户的OpenID，这是微信返回的、用户在一个小程序中的唯一标识
-	SessionKey string             `bson:"session_key"` // 用户的SessionKey，这是微信返回的会话密钥
-	Token      string             `bson:"token"`       // 用户的Token，这是我们自己生成的、用于用户登录验证的令牌
-	Name       string             `bson:"name"`        // 用户的名称
-	Avatar     string             `bson:"avatar"`      // 头像保存的路径。当然这个可能之后不再需要，这个要看微信接口接的怎么样。
-	Signature  string             `bson:"signature"`   // 用户的签名
+	ID         primitive.ObjectID `bson:"_id, omitempty"` // 用户的ID，使用mongodb的ObjectId作为ID
+	OpenID     string             `bson:"openid"`         // 用户的OpenID，这是微信返回的、用户在一个小程序中的唯一标识
+	SessionKey string             `bson:"session_key"`    // 用户的SessionKey，这是微信返回的会话密钥
+	Token      string             `bson:"token"`          // 用户的Token，这是我们自己生成的、用于用户登录验证的令牌
+	Name       string             `bson:"name"`           // 用户的名称
+	Avatar     string             `bson:"avatar"`         // 头像保存的路径。当然这个可能之后不再需要，这个要看微信接口接的怎么样。
+	Signature  string             `bson:"signature"`      // 用户的签名
 
 	// 这里的 CiWritten 是用户的诗词创作记录。对于这些词，我们只保存ID，具体的诗词内容存放在Ci中
 	CiWritten []primitive.ObjectID `bson:"ci_written"`
@@ -26,6 +26,7 @@ type User struct {
 // NewUser 创建一个初始化后的 User 实例，确保切片字段不为 nil
 func NewUser(openID, sessionKey, token string) User {
 	return User{
+		ID:               primitive.NewObjectID(),
 		OpenID:           openID,
 		SessionKey:       sessionKey,
 		Token:            token,
