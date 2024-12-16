@@ -1,8 +1,8 @@
 from pymongo import MongoClient
 import json
 
-# client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+# client = MongoClient('mongodb://localhost:27017/')
 
 database   = client['serenesong']
 collection = database['Ci']
