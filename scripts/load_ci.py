@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 import json
 
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
 
 database   = client['serenesong']
 collection = database['Ci']
@@ -36,7 +36,7 @@ for iter in range(0, 22):
                 new_item[key] = item[key]
         new_data.append(new_item)
         
-    # client = MongoClient('mongodb://localhost:27017/')
+    # client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
     # database   = client['serenesong']
     # collection = database['Ci']
     # collection.delete_many({})
@@ -68,7 +68,7 @@ for item in data:
             new_item[key] = item[key]
     new_data.append(new_item)
     
-# client = MongoClient('mongodb://localhost:27017/')
+# client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
 # database   = client['admin']
 # collection = database['Ci']
 # collection.delete_many({})
