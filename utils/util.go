@@ -22,6 +22,7 @@ const (
 	ErrMsgMongoCursor   = "Failed to get MongoDB cursor"
 	ErrMsgInvalidToken  = "Invalid token, please retry login"
 	ErrMsgNotAnInteger  = "Invalid value, must be an integer"
+	ErrMsgDuplicate     = "Duplicate action"
 )
 
 // IsAnyFieldEmpty 检查结构体中的任何字段是否为空
