@@ -122,3 +122,91 @@ func SendMessageHandler(c *gin.Context, token string, content string, receiver s
 	// Send response
 	c.JSON(http.StatusOK, gin.H{"messageId": result.InsertedID})
 }
+
+func SubscribeOthersHandler(c *gin.Context, token string, receiver string, subscribeOrCancel bool) {
+	// 获取用户信息
+	var user models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgInvalidToken, err)
+		return
+	}
+
+	// 将 receiver 字符串转换为 ObjectID
+	receiverId, err := primitive.ObjectIDFromHex(receiver)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgInvalidObjID, err)
+		return
+	}
+	// 先查询接收者信息
+	var receiverUser models.User
+	err = config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"_id": receiverId}).Decode(&receiverUser)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
+		return
+	}
+
+	// 判断是关注还是取消关注
+	if subscribeOrCancel == true {
+		// 检查是否已经关注
+		for _, subscribedUserId := range user.SubscribedTo {
+			if subscribedUserId == receiverId {
+				utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgDuplicate, nil)
+				return
+			}
+		}
+
+		// 进行关注操作
+		// 将当前用户ID添加到目标用户的 subscribers 列表
+		updateReceiver := bson.M{"$addToSet": bson.M{"subscribers": user.ID}}
+		_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(c, bson.M{"_id": receiverId}, updateReceiver)
+		if err != nil {
+			utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
+			return
+		}
+		// 将目标用户ID添加到当前用户的 subscribed_to 列表
+		updateUser := bson.M{"$addToSet": bson.M{"subscribed_to": receiverId}}
+		_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(c, bson.M{"_id": user.ID}, updateUser)
+		if err != nil {
+			utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
+			return
+		}
+
+		// 发送响应
+		c.JSON(http.StatusOK, gin.H{"message": "Success"})
+		return
+	}
+	// 取消关注
+	// 检查是否已关注该用户
+	found := false
+	for _, subscribedUserId := range user.SubscribedTo {
+		if subscribedUserId == receiverId {
+			// 找到该用户，准备取消关注
+			found = true
+			// 执行取消关注操作
+			updateUser := bson.M{"$pull": bson.M{"subscribed_to": receiverId}}
+			_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(c, bson.M{"_id": user.ID}, updateUser)
+			if err != nil {
+				utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
+				return
+			}
+
+			// 同时从目标用户的 subscribers 列表中移除当前用户ID
+			updateReceiver := bson.M{"$pull": bson.M{"subscribers": user.ID}}
+			_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(c, bson.M{"_id": receiverId}, updateReceiver)
+			if err != nil {
+				utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
+				return
+			}
+
+			// 发送响应
+			c.JSON(http.StatusOK, gin.H{"message": "Success"})
+			return
+		}
+	}
+	// 如果没有找到该用户
+	if !found {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgMongoFind, nil)
+		return
+	}
+}
