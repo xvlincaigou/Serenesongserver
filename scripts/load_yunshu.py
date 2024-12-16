@@ -8,7 +8,8 @@ new_data = {}
 for tone, info in data.items():
     new_data[tone] = info
     
-client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+# client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+client = MongoClient('mongodb://localhost:27017/')
 
 database   = client['serenesong']
 collection = database['PingshuiYun']

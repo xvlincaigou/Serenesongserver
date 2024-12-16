@@ -8,12 +8,15 @@ new_data = {}
 for tone, info in data.items():
     new_data[tone] = info
     
-client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+# client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+client = MongoClient('mongodb://localhost:27017/')
 
 database   = client['serenesong']
 collection = database['Characters']
-collection.delete_many({})
-result     = collection.insert_one(new_data)
+if collection.count_documents({}) == 0:
+    result = collection.insert_one(new_data)
+    print("Data inserted successfully.")
+else:
+    print("Collection already contains data. No insertion performed.")
 
-print("Data inserted successfully.")
 client.close()

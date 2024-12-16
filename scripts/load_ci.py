@@ -1,12 +1,14 @@
 from pymongo import MongoClient
 import json
 
-client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+# client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+client = MongoClient('mongodb://localhost:27017/')
 
 database   = client['serenesong']
 collection = database['Ci']
 if collection.count_documents({}) != 0:
-    assert False, "Collection is not empty, please drop it first."
+    print("Collection already contains data. No insertion performed.")
+    exit()
 
 for iter in range(0, 22):
     with open(f'./database/songci/ci.song.{iter*1000}.json', 'r', encoding='utf-8') as f:

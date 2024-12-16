@@ -6,9 +6,12 @@ from git import Repo
 
 def CloneRepo(github_url, local_dir, target_dir, new_name):
     try:
-        # Ensure the local directory exists
-        if not os.path.exists(local_dir):
-            os.makedirs(local_dir)
+        # Ensure the local directory does not already exists
+        if os.path.exists(os.path.join(local_dir, new_name)):
+            print(f"Local directory {os.path.join(local_dir, new_name)} already exists. Skipping clone.")
+            return
+        # Create the local directory
+        os.makedirs(local_dir)
         # Initialize a new repository in the local directory
         print(f"Initializing sparse checkout for {github_url}...")
         repository = Repo.init(local_dir)
@@ -72,8 +75,8 @@ if __name__ == "__main__":
     data_rhymes = "https://github.com/charlesix59/chinese_word_rhyme.git"
     db_dir = "./database"
     # Download and preprocess the data
-    # CloneRepo(data_songci, db_dir, "宋词", "songci")
-    # CloneRepo(data_rhymes, db_dir, "data", "rhymes")
+    CloneRepo(data_songci, db_dir, "宋词", "songci")
+    CloneRepo(data_rhymes, db_dir, "data", "rhymes")
     # Run the scripts to generate the database
     scripts = [
         "./scripts/rev_yunshu.py",

@@ -17,7 +17,8 @@ for item in data:
             new_item['name'] = item[key]
     new_data.append(new_item)
     
-client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+# client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
+client = MongoClient('mongodb://localhost:27017/')
 
 database   = client['serenesong']
 collection = database['Author']
