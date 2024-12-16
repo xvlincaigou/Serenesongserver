@@ -5,7 +5,8 @@ client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin
 
 database   = client['serenesong']
 collection = database['Ci']
-collection.delete_many({})
+if collection.count_documents({}) != 0:
+    assert False, "Collection is not empty, please drop it first."
 
 for iter in range(0, 22):
     with open(f'./database/songci/ci.song.{iter*1000}.json', 'r', encoding='utf-8') as f:
@@ -36,14 +37,8 @@ for iter in range(0, 22):
                 new_item[key] = item[key]
         new_data.append(new_item)
         
-    # client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
-    # database   = client['serenesong']
-    # collection = database['Ci']
-    # collection.delete_many({})
     result = collection.insert_many(new_data)
-
-    print("Data inserted successfully.")
-    # client.close()
+    print(f"Data ci.song.{iter*1000}.json inserted successfully.")
     
 with open(f'./database/songci/ci.song.2019y.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
@@ -68,11 +63,7 @@ for item in data:
             new_item[key] = item[key]
     new_data.append(new_item)
     
-# client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin')
-# database   = client['admin']
-# collection = database['Ci']
-# collection.delete_many({})
 result = collection.insert_many(new_data)
+print(f"Data ci.song.2019y.json inserted successfully.")
 
-print("Data inserted successfully.")
 client.close()

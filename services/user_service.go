@@ -22,6 +22,29 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func UnpackUser(c *gin.Context, user_id primitive.ObjectID) (string, string, error) {
+	// Check if user_id is valid
+	var author models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"_id": user_id}).Decode(&author)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
+		return "", "", err
+	} 
+	// The "Avater" field in target_user is a path to the avatar file, not the image data itself
+	avatar := author.Avatar
+	if avatar == "" {
+		avatar = "/tmp/TsingpingYue/avatars/avatar.png"
+	}
+	picture, err := os.ReadFile(avatar)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, "Failed to read avatar file", err)
+		return "", "", err
+	}
+	// Encode the image data as base64
+	encoded := base64.StdEncoding.EncodeToString(picture)
+	return encoded, author.Name, nil
+}
+
 func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicContent {
 	var dynamic_contents []models.DynamicContent
 	for _, dynamic := range dynamics {
@@ -29,6 +52,7 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 		var content models.DynamicContent
 		content.ID = dynamic.ID
 		content.Author = dynamic.Author
+		content.Avatar, content.Name, _ = UnpackUser(c, dynamic.Author)
 		// Process dynamic content of different types
 		if dynamic.Type == 0 { // Classic masterpiece
 			// var classic models.Ci
@@ -43,7 +67,7 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 			// var modern models.ModernWork
 			err := config.MongoClient.Database("serenesong").Collection("UserWorks").FindOne(c, bson.M{"_id": dynamic.UserWorkId}).Decode(&content.Modern)
 			if err != nil {
-				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+				utils.HandleError(c, http.StatusNotFound, "Fuck!!!", err)
 				return nil
 			}
 			// Pack the content and the comments
