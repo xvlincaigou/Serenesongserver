@@ -67,7 +67,7 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 			// var modern models.ModernWork
 			err := config.MongoClient.Database("serenesong").Collection("UserWorks").FindOne(c, bson.M{"_id": dynamic.UserWorkId}).Decode(&content.Modern)
 			if err != nil {
-				utils.HandleError(c, http.StatusNotFound, "Fuck!!!", err)
+				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 				return nil
 			}
 			// Pack the content and the comments
@@ -109,7 +109,7 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 			var comment models.Comment
 			err := config.MongoClient.Database("serenesong").Collection("Comments").FindOne(c, bson.M{"_id": comment_id}).Decode(&comment)
 			if err != nil {
-				utils.HandleError(c, http.StatusNotFound, comment_id.Hex(), err)
+				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 				return nil
 			}
 			content.Comments = append(content.Comments, comment)
