@@ -17,9 +17,15 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Database files
+database/
+
 # Go workspace file
 go.work
 go.work.sum
+# log file
+server.log
+
 # log file
 server.log
 

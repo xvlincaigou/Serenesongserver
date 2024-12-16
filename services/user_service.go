@@ -5,8 +5,8 @@ import (
 	// "fmt"
 	// "log"
 	// "time"
-	"os"
 	"encoding/base64"
+	"os"
 	"path/filepath"
 
 	"Serenesongserver/config"
@@ -27,8 +27,10 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 	for _, dynamic := range dynamics {
 		// Find the content of the dynamic using the dynamic type and the corresponding ID
 		var content models.DynamicContent
+		content.ID = dynamic.ID
+		content.Author = dynamic.Author
 		// Process dynamic content of different types
-		if dynamic.Type == 0 {	// Classic masterpiece
+		if dynamic.Type == 0 { // Classic masterpiece
 			// var classic models.Ci
 			err := config.MongoClient.Database("serenesong").Collection("Ci").FindOne(c, bson.M{"_id": dynamic.CiId}).Decode(&content.Classic)
 			if err != nil {
@@ -37,7 +39,7 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 			}
 			// Pack the content and the comments
 			content.Type = 0
-		} else if dynamic.Type == 1 {	// Modern works
+		} else if dynamic.Type == 1 { // Modern works
 			// var modern models.ModernWork
 			err := config.MongoClient.Database("serenesong").Collection("UserWorks").FindOne(c, bson.M{"_id": dynamic.UserWorkId}).Decode(&content.Modern)
 			if err != nil {
@@ -46,12 +48,31 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 			}
 			// Pack the content and the comments
 			content.Type = 1
-		} else if dynamic.Type == 2 {	// Collections
-			// var collection models.Collection
-			err := config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": dynamic.CollectionItemId}).Decode(&content.Item)
+		} else if dynamic.Type == 2 { // Collections
+			// find the collection using the collection ID
+			result := config.MongoClient.Database("serenesong").Collection("collections").FindOne(c, bson.M{"_id": dynamic.CollectionId})
+			if result.Err() != nil {
+				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, result.Err())
+				return nil
+			}
+			// Decode the collection
+			var collection models.Collection
+			err := result.Decode(&collection)
 			if err != nil {
 				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 				return nil
+			}
+			// Pack the content and the comments
+			for _, item := range collection.CollectionItems {
+				if item.CiId == dynamic.CollectionCiId {
+					content.Comment = item.Comment
+					err := config.MongoClient.Database("serenesong").Collection("Ci").FindOne(c, bson.M{"_id": item.CiId}).Decode(&(content.CollectionCi))
+					if err != nil {
+						utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+						return nil
+					}
+					break
+				}
 			}
 			// Pack the content and the comments
 			content.Type = 2
@@ -111,7 +132,7 @@ func ReturnDynamics(c *gin.Context, user_id string, token string) {
 		dynamic_indices = append(dynamic_indices, dynamic)
 	}
 	var dynamics = UnpackDynamics(c, dynamic_indices)
-	if  dynamics != nil { 
+	if dynamics != nil {
 		// Return dynamics of the target user
 		c.JSON(http.StatusOK, gin.H{"dynamics": dynamics})
 	}
@@ -319,8 +340,8 @@ func ReturnUserInfo(c *gin.Context, user_id string, token string) {
 	encoded := base64.StdEncoding.EncodeToString(picture)
 	// Return the base64 encoded image data
 	c.JSON(http.StatusOK, gin.H{
-		"avatar": encoded,
-		"name":   target_user.Name,
+		"avatar":    encoded,
+		"name":      target_user.Name,
 		"signature": target_user.Signature,
 	})
 }
@@ -372,7 +393,7 @@ func SaveNameAvatar(c *gin.Context, token string, name string, avatar string, si
 		return
 	}
 	// Save the avatar to the directory
-	path := filepath.Join(folder, user.ID.Hex() + ".png")
+	path := filepath.Join(folder, user.ID.Hex()+".png")
 	err = os.WriteFile(path, picture, 0644)
 	if err != nil {
 		utils.HandleError(c, http.StatusInternalServerError, "Failed to save avatar file", err)
@@ -381,11 +402,11 @@ func SaveNameAvatar(c *gin.Context, token string, name string, avatar string, si
 	// Update user name and avatar in the database
 	_, err = config.MongoClient.Database("serenesong").Collection("users").UpdateOne(
 		c,
-		bson.M{"token": token}, 
+		bson.M{"token": token},
 		bson.M{
 			"$set": bson.M{
-				"name":   name,
-				"avatar": path,
+				"name":      name,
+				"avatar":    path,
 				"signature": signature,
 			},
 		},
