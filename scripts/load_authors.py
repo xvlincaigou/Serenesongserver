@@ -21,8 +21,10 @@ client = MongoClient('mongodb://root:example@mongodb:27017/mydb?authSource=admin
 
 database   = client['serenesong']
 collection = database['Author']
-collection.delete_many({})
-result     = collection.insert_many(new_data)
-
-print("Data inserted successfully.")
+if collection.count_documents({}) == 0:
+    result = collection.insert_many(new_data)
+    print("Data inserted successfully.")
+else:
+    print("Collection already contains data. No insertion performed.")
+    
 client.close()
