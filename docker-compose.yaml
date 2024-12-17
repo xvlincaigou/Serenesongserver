@@ -52,7 +52,6 @@ services:
     container_name: python-loader
     restart: "no"
     volumes:
-      - ./json_files:/app/database
       - ./scripts:/app/scripts
       - ./requirements.txt:/app/requirements.txt
       - ./setup.py:/app/setup.py
