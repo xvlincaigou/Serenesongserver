@@ -60,7 +60,7 @@ services:
       [
         "sh",
         "-c",
-        "apk add --no-cache git && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt && python setup.py",
+        "apk add --no-cache git && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt && python -u setup.py install",
       ]
     environment:
       MONGODB_URI: mongodb://root:example@mongodb:27017/mydb?authSource=admin
