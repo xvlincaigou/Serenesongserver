@@ -38,8 +38,7 @@ services:
     environment:
       MONGODB_URI: mongodb://root:example@mongodb:27017/mydb?authSource=admin
     volumes:
-      - ./json_files:/app/json_files
-      - ./scripts:/app/scripts
+      - app-data:/tmp/TsingpingYue
     depends_on:
       mongodb:
         condition: service_healthy
@@ -87,6 +86,7 @@ services:
 
 volumes:
   mongo-data:
+  app-data:
 
 networks:
   app-network:
