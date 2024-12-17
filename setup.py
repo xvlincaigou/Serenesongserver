@@ -10,9 +10,6 @@ def CloneRepo(github_url, local_dir, target_dir, new_name):
         if os.path.exists(os.path.join(local_dir, new_name)):
             print(f"Local directory {os.path.join(local_dir, new_name)} already exists. Skipping clone.")
             return
-        # Create the local directory
-        if not os.path.exists(local_dir):
-            os.makedirs(local_dir)
         # Initialize a new repository in the local directory
         print(f"Initializing sparse checkout for {github_url}...")
         repository = Repo.init(local_dir)
@@ -79,7 +76,9 @@ if __name__ == "__main__":
     data_songci = "https://github.com/chinese-poetry/chinese-poetry.git"
     data_rhymes = "https://github.com/charlesix59/chinese_word_rhyme.git"
     db_dir = "./database"
-    # Download and preprocess the data
+    # Create the local directory && Download and preprocess the data
+    if not os.path.exists(db_dir):
+        os.makedirs(db_dir)
     CloneRepo(data_songci, db_dir, "宋词", "songci")
     CloneRepo(data_rhymes, db_dir, "data", "rhymes")
     # Run the scripts to generate the database
