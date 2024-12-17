@@ -112,7 +112,12 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 				utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 				return nil
 			}
-			content.Comments = append(content.Comments, comment)
+			// Pack the comment
+			packet := models.CommentPacket{
+				Comment: comment,
+			}
+			packet.Name, packet.Avatar, _ = UnpackUser(c, comment.Commenter)
+			content.Comments = append(content.Comments, packet)
 		}
 		// Fetch the likes
 		content.Likes = dynamic.Likes

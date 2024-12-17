@@ -8,3 +8,9 @@ type Comment struct {
 	Commenter primitive.ObjectID `bson:"commenter"`
 	Content   string             `bson:"content"`
 }
+
+type CommentPacket struct {
+	Name      string             `bson:"name"`
+	Avatar    string             `bson:"avatar"`
+	Comment   Comment            `bson:"comment"`
+}
