@@ -114,9 +114,10 @@ func UnpackDynamics(c *gin.Context, dynamics []models.Dynamic) []models.DynamicC
 			}
 			// Pack the comment
 			packet := models.CommentPacket{
-				Comment: comment,
+				Comment:   comment,
+				CommentId: comment_id,
 			}
-			packet.Name, packet.Avatar, _ = UnpackUser(c, comment.Commenter)
+			packet.Avatar, packet.Name, _ = UnpackUser(c, comment.Commenter)
 			content.Comments = append(content.Comments, packet)
 		}
 		// Fetch the likes
