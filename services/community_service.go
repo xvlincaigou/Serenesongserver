@@ -252,10 +252,15 @@ func SendComment(c *gin.Context, token string, content string, post_id string) {
 		utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgMongoUpdate, err)
 		return
 	}
+	// Set name & avatar of the commenter
+	avatar, name, _ := UnpackUser(c, user.ID)
 	// Return the new comment
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Comment added successfully",
 		"comment": comment,
+		"comment_id": result.InsertedID.(primitive.ObjectID).Hex(),
+		"name": name,
+		"avatar": avatar,
 	})
 }
 
@@ -301,6 +306,7 @@ func DeleteComment(c *gin.Context, token string, comment_id string) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Comment deleted successfully",
 		"comment": comment,
+		"comment_id": comment_id,
 	})
 }
 
