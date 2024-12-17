@@ -253,14 +253,15 @@ func SendComment(c *gin.Context, token string, content string, post_id string) {
 		return
 	}
 	// Set name & avatar of the commenter
-	avatar, name, _ := UnpackUser(c, user.ID)
+	packet := models.CommentPacket{
+		Comment: comment,
+	}
+	packet.Name, packet.Avatar, _ = UnpackUser(c, user.ID)
 	// Return the new comment
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Comment added successfully",
-		"comment": comment,
+		"comment": packet,
 		"comment_id": result.InsertedID.(primitive.ObjectID).Hex(),
-		"name": name,
-		"avatar": avatar,
 	})
 }
 

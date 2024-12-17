@@ -41,6 +41,6 @@ type DynamicContent struct {
 	CollectionCi Ci     `bson:"collection_ci"`
 	Comment      string `bson:"comment"`
 	// 这个动态下面的评论
-	Comments []Comment            `bson:"comments"`
+	Comments []CommentPacket      `bson:"comments"`
 	Likes    []primitive.ObjectID `bson:"likes"`
 }
