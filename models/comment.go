@@ -10,6 +10,7 @@ type Comment struct {
 }
 
 type CommentPacket struct {
+	CommentId primitive.ObjectID `bson:"_id"`
 	Name      string             `bson:"name"`
 	Avatar    string             `bson:"avatar"`
 	Comment   Comment            `bson:"comment"`
