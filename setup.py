@@ -7,15 +7,15 @@ from git import Repo
 def CloneRepo(github_url, local_dir, target_dir, new_name):
     try:
         # Ensure the local directory does not already exists
-        folder = os.path.join(local_dir, new_name)
-        if os.path.exists(folder):
-            print(f"Local directory {folder} already exists. Skipping clone.")
+        if os.path.exists(os.path.join(local_dir, new_name)):
+            print(f"Local directory {os.path.join(local_dir, new_name)} already exists. Skipping clone.")
             return
         # Create the local directory
-        os.makedirs(folder)
+        if not os.path.exists(local_dir):
+            os.makedirs(local_dir)
         # Initialize a new repository in the local directory
         print(f"Initializing sparse checkout for {github_url}...")
-        repository = Repo.init(folder)
+        repository = Repo.init(local_dir)
         remote_org = repository.create_remote('origin', github_url)
         # Fetch remote branches to determine the default branch
         remote_org.fetch()
@@ -24,10 +24,11 @@ def CloneRepo(github_url, local_dir, target_dir, new_name):
         # Determine the branch to use (prioritize master, then main)
         checkout = 'master' if 'master' in branches else 'main'
         if checkout not in branches:
+            shutil.rmtree(local_dir)
             raise Exception("Neither 'master' nor 'main' branch exists in the repository.")
         print(f"Using branch: {checkout}")
         # Enable sparse checkout
-        sparse_path = os.path.join(folder, '.git', 'info', 'sparse-checkout')
+        sparse_path = os.path.join(local_dir, '.git', 'info', 'sparse-checkout')
         with open(sparse_path, 'w') as f:
             f.write(target_dir + '\n')
         print(f"Configured sparse checkout for folder: {target_dir}.")
@@ -36,23 +37,26 @@ def CloneRepo(github_url, local_dir, target_dir, new_name):
         repository.git.config('core.sparseCheckout', 'true')
         repository.git.checkout(checkout)
         remote_org.pull(checkout)
-        print(f"Cloned folder '{target_dir}' from branch '{checkout}' into {folder}.")
+        print(f"Cloned folder '{target_dir}' from branch '{checkout}' into {local_dir}.")
         # Remove the .git folder
-        git_folder = os.path.join(folder, ".git")
+        git_folder = os.path.join(local_dir, ".git")
         if os.path.exists(git_folder):
             shutil.rmtree(git_folder)
         else:
-            print(f"[!].git folder not found in {repo_path}.")
+            shutil.rmtree(local_dir)
+            print(f"[!].git folder not found in {local_dir}.")
         # Rename the folder to match the target name
-        old_path = os.path.join(folder, target_dir)
-        new_path = os.path.join(folder, new_name)
+        old_path = os.path.join(local_dir, target_dir)
+        new_path = os.path.join(local_dir, new_name)
         if os.path.exists(old_path):
             os.rename(old_path, new_path)
-            print(f"Renamed folder '{old_path}' to '{new_path}'")
+            print(f"Rename folder '{old_path}' to '{new_path}'.")
         else:
+            shutil.rmtree(local_dir)
             raise FileNotFoundError(f"The target folder '{old_path}' does not exist after clone.")
     
     except Exception as e:
+        shutil.rmtree(local_dir)
         print(f"Error cloning repository: {e}")
         sys.exit(1)
         
