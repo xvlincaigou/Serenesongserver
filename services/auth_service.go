@@ -81,8 +81,8 @@ func LoginHandler(c *gin.Context, wxcode string) {
 	err = collection.FindOne(ctx, bson.M{"openid": loginResp.OpenId}).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		// 如果没有找到用户，则创建新用户
-		user = models.NewUser(loginResp.OpenId, loginResp.SessionKey, token)
-		_, err = collection.InsertOne(ctx, user)
+		var n_user = models.NewUser(loginResp.OpenId, loginResp.SessionKey, token)
+		_, err = collection.InsertOne(ctx, n_user)
 		if err != nil {
 			utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgInternalError, err)
 			return
