@@ -3,16 +3,13 @@ package main
 import (
 	"Serenesongserver/config"
 	"Serenesongserver/controllers"
-	// "Serenesongserver/utils"
-
+	"Serenesongserver/utils"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	config.LoadEnv()
-
-	// 只有在需要测试推荐任务的时候才使用这个功能
-	// utils.SetupCronJobs()
+	utils.SetupCronJobs()
 
 	router := gin.Default()
 
@@ -73,6 +70,7 @@ func main() {
 	router.GET("/getMessagesISend", controllers.GetMessagesISend)
 	router.POST("/sendMessage", controllers.SendMessage)
 	router.POST("/subscribeOthers", controllers.SubscribeOthers)
+	router.GET("/searchUserByName", controllers.SearchUserByName)
 
 	router.Run("0.0.0.0:8080")
 }

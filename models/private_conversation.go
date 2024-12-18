@@ -6,6 +6,7 @@ import (
 )
 
 type Message struct {
+	ID           primitive.ObjectID `json:"_id,omitempty"`
 	Sender       primitive.ObjectID `json:"sender"`
 	SenderName   string             `json:"senderName"`
 	Receiver     primitive.ObjectID `json:"receiver"`
