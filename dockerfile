@@ -8,6 +8,7 @@ WORKDIR /app
 
 # 复制 go.mod 和 go.sum 文件
 COPY go.mod go.sum ./
+COPY static/avatar.png /tmp/TsingpingYue/avatars/avatar.png 
 
 # 下载 Go 依赖
 RUN go mod download
@@ -20,5 +21,3 @@ EXPOSE 8080
 
 # 设置容器启动命令，使用 `go run` 运行主程序
 CMD ["go", "run", "main.go"]
-
-COPY static/avatar.png /tmp/TsingpingYue/avatars/avatar.png 
