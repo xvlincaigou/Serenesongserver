@@ -227,7 +227,7 @@ func SearchUserByNameHandler(c *gin.Context, name string) {
 
 	avatar := user.Avatar
 	if avatar == "" {
-		avatar = "/tmp/TsingpingYue/avatars/avatar.png"
+		avatar = "/tmp/avatar.png"
 	}
 	picture, err := os.ReadFile(avatar)
 	if err != nil {
