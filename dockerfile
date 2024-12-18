@@ -12,7 +12,7 @@ COPY . .
 # 下载 Go 依赖
 RUN go mod download
 
-RUN cp static/avatar.png /tmp/TsingpingYue/avatars
+RUN cp static/avatar.png /tmp
 
 # 暴露应用端口，假设 Gin 默认运行在 8080 端口
 EXPOSE 8080

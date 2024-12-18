@@ -29,11 +29,11 @@ func UnpackUser(c *gin.Context, user_id primitive.ObjectID) (string, string, err
 	if err != nil {
 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return "", "", err
-	} 
+	}
 	// The "Avater" field in target_user is a path to the avatar file, not the image data itself
 	avatar := author.Avatar
 	if avatar == "" {
-		avatar = "/tmp/TsingpingYue/avatars/avatar.png"
+		avatar = "/tmp/avatar.png"
 	}
 	picture, err := os.ReadFile(avatar)
 	if err != nil {
@@ -359,7 +359,7 @@ func ReturnUserInfo(c *gin.Context, user_id string, token string) {
 	// The "Avater" field in target_user is a path to the avatar file, not the image data itself
 	avatar := target_user.Avatar
 	if avatar == "" {
-		avatar = "/tmp/TsingpingYue/avatars/avatar.png"
+		avatar = "/tmp/avatar.png"
 	}
 	picture, err := os.ReadFile(avatar)
 	if err != nil {
