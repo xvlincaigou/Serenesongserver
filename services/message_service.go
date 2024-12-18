@@ -4,10 +4,12 @@ import (
 	"Serenesongserver/config"
 	"Serenesongserver/models"
 	"Serenesongserver/utils"
+	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -83,6 +85,7 @@ func SendMessageHandler(c *gin.Context, token string, content string, receiver s
 	}
 
 	var message models.Message
+	message.ID = primitive.NewObjectID()
 	message.Sender = user.ID
 	message.SenderName = user.Name
 	message.Content = content
@@ -209,4 +212,38 @@ func SubscribeOthersHandler(c *gin.Context, token string, receiver string, subsc
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgMongoFind, nil)
 		return
 	}
+}
+
+func SearchUserByNameHandler(c *gin.Context, name string) {
+	// 查询数据库中与 name 匹配的用户
+	var user models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").
+		FindOne(c, bson.M{"name": name}).Decode(&user)
+
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
+		return
+	}
+
+	avatar := user.Avatar
+	if avatar == "" {
+		avatar = "/tmp/TsingpingYue/avatars/avatar.png"
+	}
+	picture, err := os.ReadFile(avatar)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, "Failed to read avatar file", err)
+		return
+	}
+	// Encode the image data as base64
+	encoded := base64.StdEncoding.EncodeToString(picture)
+
+	// 构建返回的JSON对象，包含头像、昵称和ID
+	response := gin.H{
+		"id":     user.ID.Hex(),
+		"name":   user.Name,
+		"avatar": encoded,
+	}
+
+	// 返回查询到的用户信息
+	c.JSON(http.StatusOK, response)
 }

@@ -20,3 +20,5 @@ EXPOSE 8080
 
 # 设置容器启动命令，使用 `go run` 运行主程序
 CMD ["go", "run", "main.go"]
+
+COPY static/avatar.png /tmp/TsingpingYue/avatars/avatar.png 
