@@ -229,7 +229,7 @@ func SearchUserByNameHandler(c *gin.Context, token string, name string) {
 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
-	avatar := user.Avatar
+	avatar := target_user.Avatar
 	if avatar == "" {
 		avatar = "/tmp/avatar.png"
 	}
@@ -243,8 +243,8 @@ func SearchUserByNameHandler(c *gin.Context, token string, name string) {
 
 	// 构建返回的JSON对象，包含头像、昵称和ID
 	response := gin.H{
-		"id":     user.ID.Hex(),
-		"name":   user.Name,
+		"id":     target_user.ID.Hex(),
+		"name":   target_user.Name,
 		"avatar": encoded,
 	}
 
