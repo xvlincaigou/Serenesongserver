@@ -214,17 +214,21 @@ func SubscribeOthersHandler(c *gin.Context, token string, receiver string, subsc
 	}
 }
 
-func SearchUserByNameHandler(c *gin.Context, name string) {
-	// 查询数据库中与 name 匹配的用户
+func SearchUserByNameHandler(c *gin.Context, token string, name string) {
+	// Verify user token
 	var user models.User
-	err := config.MongoClient.Database("serenesong").Collection("users").
-		FindOne(c, bson.M{"name": name}).Decode(&user)
-
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgInvalidToken, err)
+		return
+	}
+	// Find user by name
+	var target_user models.User
+	err = config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"name": name}).Decode(&target_user)
 	if err != nil {
 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
-
 	avatar := user.Avatar
 	if avatar == "" {
 		avatar = "/tmp/avatar.png"
