@@ -70,17 +70,21 @@ func SubscribeOthers(c *gin.Context) {
 }
 
 func SearchUserByName(c *gin.Context) {
-	var json_data bson.M
-	if err := c.ShouldBindJSON(&json_data); err != nil {
-		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, err)
-		return
-	}
-
-	name, name_ok := json_data["name"].(string)
-	if !name_ok {
+	// var json_data bson.M
+	// if err := c.ShouldBindJSON(&json_data); err != nil {
+	// 	utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, err)
+	// 	return
+	// }
+	// name, name_ok := json_data["name"].(string)
+	// if !name_ok {
+	// 	utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
+	// 	return
+	// }
+	token := c.Query("token")
+	name := c.Query("name")
+	if name == "" || token == "" {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
 		return
 	}
-
-	services.SearchUserByNameHandler(c, name)
+	services.SearchUserByNameHandler(c, token, name)
 }
