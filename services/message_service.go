@@ -251,3 +251,13 @@ func SearchUserByNameHandler(c *gin.Context, token string, name string) {
 	// 返回查询到的用户信息
 	c.JSON(http.StatusOK, response)
 }
+
+func GetMessageByIdHandler(c *gin.Context, messageId string) {
+	var message models.Message
+	err := config.MongoClient.Database("serenesong").Collection("messages").FindOne(c, bson.M{"_id": primitive.ObjectIDFromHex(messageId)}).Decode(&message)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
+		return
+	}
+	c.JSON(http.StatusOK, message)
+}

@@ -3,9 +3,11 @@ package controllers
 import (
 	"Serenesongserver/services"
 	"Serenesongserver/utils"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"net/http"
+	"golang.org/x/text/message"
 )
 
 func GetMessagesIGet(c *gin.Context) {
@@ -70,16 +72,6 @@ func SubscribeOthers(c *gin.Context) {
 }
 
 func SearchUserByName(c *gin.Context) {
-	// var json_data bson.M
-	// if err := c.ShouldBindJSON(&json_data); err != nil {
-	// 	utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, err)
-	// 	return
-	// }
-	// name, name_ok := json_data["name"].(string)
-	// if !name_ok {
-	// 	utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
-	// 	return
-	// }
 	token := c.Query("token")
 	name := c.Query("name")
 	if name == "" || token == "" {
@@ -87,4 +79,13 @@ func SearchUserByName(c *gin.Context) {
 		return
 	}
 	services.SearchUserByNameHandler(c, token, name)
+}
+
+func GetMessageById(c *gin.Context) {
+	messageId := c.Query("messageId")
+	if messageId == "" {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
+		return
+	}
+	services.GetMessageByIdHandler(c, messageId)
 }
