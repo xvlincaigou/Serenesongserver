@@ -97,8 +97,8 @@ func ChangePrivacy(c *gin.Context) {
 		return
 	}
 	// Extract the token and the work_id from the JSON.
-	work_id, work_ok    := json_data["work_id"].(string)
-	token, token_ok 	:= json_data["token"].(string)
+	work_id, work_ok := json_data["work_id"].(string)
+	token, token_ok := json_data["token"].(string)
 	privacy, privacy_ok := json_data["privacy"].(bool)
 	if !work_ok || !token_ok || !privacy_ok {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
@@ -115,9 +115,9 @@ func SaveUserInfo(c *gin.Context) {
 		return
 	}
 	// Extract the token and the draft data from the JSON.
-	token, token_ok   := json_data["token"].(string)
+	token, token_ok := json_data["token"].(string)
 	avatar, avatar_ok := json_data["avatar"].(string)
-	name, name_ok     := json_data["name"].(string)
+	name, name_ok := json_data["name"].(string)
 	signature, sig_ok := json_data["signature"].(string)
 	if !token_ok || !avatar_ok || !name_ok || !sig_ok {
 		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidJSON, nil)
@@ -133,4 +133,14 @@ func GetPersonalID(c *gin.Context) {
 		return
 	}
 	services.ReturnPersonalID(c, token)
+}
+
+func GetUserInfoText(c *gin.Context) {
+	user_id := c.Query("user_id")
+	token := c.Query("token")
+	if user_id == "" || token == "" {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidParams, nil)
+		return
+	}
+	services.GetUserInfoTextHandler(c, user_id, token)
 }

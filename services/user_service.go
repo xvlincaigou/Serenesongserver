@@ -464,3 +464,31 @@ func ReturnPersonalID(c *gin.Context, token string) {
 		"personal_id": user.ID,
 	})
 }
+
+func GetUserInfoTextHandler(c *gin.Context, user_id string, token string) {
+	// Verify user token
+	var user models.User
+	err := config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"token": token}).Decode(&user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgInvalidToken, err)
+		return
+	}
+	// Convert user_id to ObjectID
+	id, err := primitive.ObjectIDFromHex(user_id)
+	if err != nil {
+		utils.HandleError(c, http.StatusBadRequest, utils.ErrMsgInvalidObjID, err)
+		return
+	}
+	// Check if user_id is valid
+	var target_user models.User
+	err = config.MongoClient.Database("serenesong").Collection("users").FindOne(c, bson.M{"_id": id}).Decode(&target_user)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"name":      target_user.Name,
+		"signature": target_user.Signature,
+		"_id":       target_user.ID,
+	})
+}

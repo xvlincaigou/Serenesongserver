@@ -55,6 +55,7 @@ func main() {
 	router.GET("/getWorks", controllers.GetWorks)
 	router.GET("/getUserInfo", controllers.GetUserInfo)
 	router.GET("/getPersonalID", controllers.GetPersonalID)
+	router.GET("/getUserInfoText", controllers.GetUserInfoText)
 	// Community related APIs
 	router.POST("/publishDynamic", controllers.PublishDynamic)
 	router.POST("/commentPost", controllers.CommentPost)
