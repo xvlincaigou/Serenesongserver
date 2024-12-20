@@ -254,7 +254,12 @@ func SearchUserByNameHandler(c *gin.Context, token string, name string) {
 
 func GetMessageByIdHandler(c *gin.Context, messageId string) {
 	var message models.Message
-	err := config.MongoClient.Database("serenesong").Collection("messages").FindOne(c, bson.M{"_id": primitive.ObjectIDFromHex(messageId)}).Decode(&message)
+	messageObjId, err := primitive.ObjectIDFromHex(messageId)
+	if err != nil {
+		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgInvalidObjID, err)
+		return
+	}
+	err = config.MongoClient.Database("serenesong").Collection("messages").FindOne(c, bson.M{"_id": messageObjId}).Decode(&message)
 	if err != nil {
 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgMongoFind, err)
 		return

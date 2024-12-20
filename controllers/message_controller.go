@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"golang.org/x/text/message"
 )
 
 func GetMessagesIGet(c *gin.Context) {
