@@ -71,6 +71,7 @@ func main() {
 	router.POST("/sendMessage", controllers.SendMessage)
 	router.POST("/subscribeOthers", controllers.SubscribeOthers)
 	router.GET("/searchUserByName", controllers.SearchUserByName)
+	router.GET("/getMessageById", controllers.GetMessageById)
 
 	router.Run("0.0.0.0:8080")
 }
