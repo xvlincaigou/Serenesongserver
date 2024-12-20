@@ -6,12 +6,12 @@ import (
 )
 
 type Message struct {
-	ID           primitive.ObjectID `json:"_id,omitempty"`
-	Sender       primitive.ObjectID `json:"sender"`
-	SenderName   string             `json:"senderName"`
-	Receiver     primitive.ObjectID `json:"receiver"`
-	ReceiverName string             `json:"receiverName"`
-	Time         time.Time          `json:"time"`
-	Content      string             `json:"content"`
-	ReplyTo      primitive.ObjectID `json:"replyTo"`
+	ID           primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Sender       primitive.ObjectID `bson:"sender" json:"sender"`
+	SenderName   string             `bson:"senderName" json:"senderName"`
+	Receiver     primitive.ObjectID `bson:"receiver" json:"receiver"`
+	ReceiverName string             `bson:"receiverName" json:"receiverName"`
+	Time         time.Time          `bson:"time" json:"time"`
+	Content      string             `bson:"content" json:"content"`
+	ReplyTo      primitive.ObjectID `bson:"replyTo" json:"replyTo"`
 }
