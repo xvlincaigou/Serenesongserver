@@ -25,6 +25,8 @@ const (
 	ErrMsgDuplicate     = "Duplicate action"
 )
 
+const DefaultAvatarURL = "/tmp/avatar.png"
+
 // IsAnyFieldEmpty 检查结构体中的任何字段是否为空
 func IsAnyFieldEmpty(v interface{}) bool {
 	val := reflect.ValueOf(v)

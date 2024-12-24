@@ -1,7 +1,9 @@
 package services
 
 import (
+	"encoding/base64"
 	"net/http"
+	"os"
 
 	"Serenesongserver/config"
 	"Serenesongserver/models"
@@ -28,4 +30,15 @@ func GetCiByIdHandler(c *gin.Context, _id string) {
 	}
 
 	c.JSON(http.StatusOK, ci)
+}
+
+func encodeDefalutAvatar2Base64(c *gin.Context) (string, error) {
+	picture, err := os.ReadFile(utils.DefaultAvatarURL)
+	if err != nil {
+		utils.HandleError(c, http.StatusInternalServerError, "Failed to read default avatar file", err)
+		return "", err
+	}
+	// Encode the image data as base64
+	encoded := base64.StdEncoding.EncodeToString(picture)
+	return encoded, nil
 }

@@ -82,6 +82,11 @@ func LoginHandler(c *gin.Context, wxcode string) {
 	if err == mongo.ErrNoDocuments {
 		// 如果没有找到用户，则创建新用户
 		var n_user = models.NewUser(loginResp.OpenId, loginResp.SessionKey, token)
+		n_user.Avatar, err = encodeDefalutAvatar2Base64(c)
+		if err != nil {
+			utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgInternalError, err)
+			return
+		}
 		_, err = collection.InsertOne(ctx, n_user)
 		if err != nil {
 			utils.HandleError(c, http.StatusInternalServerError, utils.ErrMsgInternalError, err)

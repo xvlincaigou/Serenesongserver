@@ -4,12 +4,10 @@ import (
 	"Serenesongserver/config"
 	"Serenesongserver/models"
 	"Serenesongserver/utils"
-	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -229,23 +227,12 @@ func SearchUserByNameHandler(c *gin.Context, token string, name string) {
 		utils.HandleError(c, http.StatusNotFound, utils.ErrMsgUserNotFound, err)
 		return
 	}
-	avatar := target_user.Avatar
-	if avatar == "" {
-		avatar = "/tmp/avatar.png"
-	}
-	picture, err := os.ReadFile(avatar)
-	if err != nil {
-		utils.HandleError(c, http.StatusInternalServerError, "Failed to read avatar file", err)
-		return
-	}
-	// Encode the image data as base64
-	encoded := base64.StdEncoding.EncodeToString(picture)
 
 	// 构建返回的JSON对象，包含头像、昵称和ID
 	response := gin.H{
 		"id":     target_user.ID.Hex(),
 		"name":   target_user.Name,
-		"avatar": encoded,
+		"avatar": target_user.Avatar,
 	}
 
 	// 返回查询到的用户信息
